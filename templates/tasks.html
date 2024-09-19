@@ -12,6 +12,55 @@
 {% endblock %}
 
 {% block body %}
+<style>
+    
+  .task-title {
+    font-size: 1.5rem; /* Larger title font size */
+    font-weight: bold;
+    color: #007bff; /* Highlighted color */
+}
+
+.description-section {
+    margin-bottom: 1rem; /* Margin for spacing */
+}
+
+.description-title {
+    font-size: 1.125rem; /* Larger font size for the title */
+    font-weight: bold;
+    color: #343a40; /* Dark color for visibility */
+    display: block;
+    margin-bottom: 0.5rem; /* Spacing below the title */
+}
+
+.description-text {
+    font-size: 1rem; /* Standard font size for the description */
+    color: #495057; /* Slightly lighter color for description */
+    line-height: 1.5; /* Improved readability */
+    display: block;
+    white-space: pre-wrap; /* Preserve line breaks */
+}
+
+.users-title {
+    font-size: 1.125rem; /* Slightly larger font size */
+    font-weight: bold; /* Bold for emphasis */
+    color: #007bff; /* Highlighted color */
+}
+
+.user-names {
+    font-size: 1.1rem; /* Slightly larger font size for user names */
+    color: #333;
+}
+
+.time-info span {
+    font-size: 0.875rem; /* Smaller font size for badges */
+    margin-right: 0.5rem; /* Space between badges */
+}
+
+.badge-sm {
+    font-size: 0.75rem; /* Smaller font size for badges */
+    padding: 0.25rem 0.5rem; /* Smaller padding for badges */
+}
+</style>
 
     <!--begin::Content-->
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -156,64 +205,74 @@
         </div>
 
         {% for t in tasks %}
-        <div class="modal fade hidden" id="task-details-{{ t.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">
-                            <input type="text" class="form-control" value="{{ t.name }}" id="taskName{{ t.id }}" />
-                        </h5>
-                        <div class="ml-auto">
-                            <i class="fas fa-edit" aria-hidden="true" data-toggle="modal" data-target="#editModal" style="cursor: pointer; font-size: 20px; color: black;"></i>
-                        </div>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <i aria-hidden="true" class="ki ki-close"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="d-flex align-items-center">
-                            <div class="d-flex flex-column">
-                                <span class="font-weight-bold">{{ t.assigned_to.all|join:", " }}</span>
-                                <span class="text-muted">{{ t.description }}</span>
-                                <span class="label label-inline label-light-info">Start Time: {{ t.start_time }}</span>
-                                <span class="label label-inline label-light-success">End Time: {{ t.end_time }}</span>
+        <!-- Modal Structure -->
+            <div class="modal fade hidden" id="task-details-{{ t.id }}" tabindex="-1" role="dialog" aria-labelledby="taskDetailsLabel{{ t.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="taskTitleDisplay{{ t.id }}" class="task-title" onclick="makeTitleEditable({{ t.id }})">{{ t.name }}</h5>
+                            <input name="name" type="text" class="form-control d-none" id="taskName{{ t.id }}" value="{{ t.name }}" onblur="saveTaskTitle({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'title')" />
+                            <div class="ml-auto">
+                                <i class="fas fa-edit" aria-hidden="true" style="cursor: pointer; font-size: 20px; color: #007bff;" onclick="updateTask({{ t.id }})"></i>
                             </div>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <i aria-hidden="true" class="ki ki-close"></i>
+                            </button>
                         </div>
-                        <h6 class="mt-4">Subtasks</h6>
-                        <div class="progress mt-3">
-                            <div class="progress-bar bg-danger" role="progressbar" id="progressBar{{ t.id }}" style="width: {{ t.subtasks.completed|floatformat:0 }}%;" aria-valuenow="{{ t.subtasks.completed }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        
-                            <ul class="list-unstyled" id="subtaskList{{ t.id }}">
+                        <div class="modal-body">
+                            <div class="d-flex flex-column mb-4">
+                                <div class="mb-2">
+                                    <span class="users-title">Assigned To:</span>
+                                    <span class="font-weight-bold user-names">{{ t.assigned_to.all|join:", " }}</span>
+                                </div>
+                                <div class="description-section">
+                                    <!-- Description shown as plain text initially -->
+                                    <p id="taskDescriptionDisplay{{ t.id }}" class="description-text" onclick="makeDescriptionEditable({{ t.id }})">{{ t.description }}</p>
+                                    
+                                    <!-- Description input field, hidden by default -->
+                                    <textarea name="description" class="form-control d-none" id="taskDescription{{ t.id }}" onblur="saveTaskDescription({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'description')">{{ t.description }}</textarea>
+                                </div>
+                                <div class="time-info">
+                                    <span class="badge badge-info badge-sm">Start Time: {{ t.start_time }}</span>
+                                    <span class="badge badge-success badge-sm">End Time: {{ t.end_time }}</span>
+                                </div>
+                            </div>
+            
+                            <h6 class="mt-4">Subtasks</h6>
+                            {% comment %} <div class="progress mb-3">
+                                <div class="progress-bar bg-danger" role="progressbar" id="progressBar{{ t.id }}" style="width: {{ t.subtasks.completed|floatformat:0 }}%;" aria-valuenow="{{ t.subtasks.completed }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div> {% endcomment %}
+                            
+                            <ul class="list-unstyled mb-4" id="subtaskList{{ t.id }}">
                                 {% for subtask in t.subtasks.all %}
-                                    <li>
-                                        <input type="checkbox" class="subtask-checkbox" id="subtask{{ subtask.id }}"
-                                            onchange="updateSubtaskStatus({{ subtask.id }}, this.checked)" {{ subtask.is_completed|yesno:"checked," }} />
+                                    <li class="d-flex align-items-center mb-2">
+                                        <input type="checkbox" class="subtask-checkbox mr-2" id="subtask{{ subtask.id }}" onchange="updateSubtaskStatus({{ subtask.id }}, this.checked)" {{ subtask.is_completed|yesno:"checked," }} />
                                         <label for="subtask{{ subtask.id }}">{{ subtask.description }}</label>
                                     </li>
                                 {% endfor %}
                             </ul>
                             
-                            <input type="text" class="form-control mt-2" placeholder="Add a subtask..." id="subtaskInput{{ t.id }}">
-                            <button class="btn btn-primary mt-2" onclick="addSubtask({{ t.id }})">Add Subtask</button>
-
-                            
-                        <div class="comments mt-4">
-                            <h6>Comments</h6>
-                            <div id="commentsSection{{ t.id }}">
-                                {% for comment in t.comments.all %}
-                                    <div class="comment-item">
-                                        <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
-                                    </div>
-                                {% endfor %}
+                            <div class="mb-4">
+                                <input type="text" class="form-control mb-2" placeholder="Add a subtask..." id="subtaskInput{{ t.id }}">
+                                <button class="btn btn-primary" onclick="addSubtask({{ t.id }})">Add Subtask</button>
                             </div>
-                            <textarea class="form-control mt-2" placeholder="Add a comment..." id="commentInput{{ t.id }}"></textarea>
-                            <button class="btn btn-primary mt-2" onclick="addComment({{ t.id }})">Submit</button>
+            
+                            <div class="comments">
+                                <h6>Comments</h6>
+                                <div id="commentsSection{{ t.id }}" class="mb-3">
+                                    {% for comment in t.comments.all %}
+                                        <div class="comment-item mb-2">
+                                            <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <textarea class="form-control mb-2" placeholder="Add a comment..." id="commentInput{{ t.id }}"></textarea>
+                                <button class="btn btn-primary" onclick="addComment({{ t.id }})">Submit</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
         <!--end::Entry-->
     </div>
@@ -227,6 +286,118 @@
     <script src="{% static '/js/pages/my-script.js' %}"></script>
 
     <script>
+
+                
+        // Function to make the task title editable
+        function makeTitleEditable(taskId) {
+            const titleDisplay = document.getElementById(`taskTitleDisplay${taskId}`);
+            const titleInput = document.getElementById(`taskName${taskId}`);
+            
+            titleDisplay.classList.add('d-none'); // Hide the title display
+            titleInput.classList.remove('d-none'); // Show the input field
+            titleInput.focus(); // Focus on the input field for immediate editing
+        }
+
+        // Function to save the task title when editing is done
+        function saveTaskTitle(taskId) {
+            const titleDisplay = document.getElementById(`taskTitleDisplay${taskId}`);
+            const titleInput = document.getElementById(`taskName${taskId}`);
+
+            // Update the title display with the new input value
+            titleDisplay.textContent = titleInput.value;
+
+            // Hide the input and show the display
+            titleInput.classList.add('d-none');
+            titleDisplay.classList.remove('d-none');
+            
+            // Optionally send AJAX request to update the server
+            updateTask(taskId);
+        }
+
+        // Function to make the description editable
+        function makeDescriptionEditable(taskId) {
+            const descDisplay = document.getElementById(`taskDescriptionDisplay${taskId}`);
+            const descInput = document.getElementById(`taskDescription${taskId}`);
+            
+            descDisplay.classList.add('d-none'); // Hide the description display
+            descInput.classList.remove('d-none'); // Show the input field
+            descInput.focus(); // Focus on the input field for immediate editing
+        }
+
+        // Function to save the task description when editing is done
+        function saveTaskDescription(taskId) {
+            const descDisplay = document.getElementById(`taskDescriptionDisplay${taskId}`);
+            const descInput = document.getElementById(`taskDescription${taskId}`);
+
+            // Update the description display with the new input value
+            descDisplay.textContent = descInput.value;
+
+            // Hide the input and show the display
+            descInput.classList.add('d-none');
+            descDisplay.classList.remove('d-none');
+            
+            // Optionally send AJAX request to update the server
+            updateTask(taskId);
+        }
+
+        // Function to handle saving when the user presses Enter
+        function checkEnter(event, taskId, field) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (field === 'title') {
+                    saveTaskTitle(taskId);
+                } else if (field === 'description') {
+                    saveTaskDescription(taskId);
+                }
+            }
+        }
+        
+        function updateTask(taskId) {
+            const titleInput = document.getElementById(`taskName${taskId}`);
+            const descInput = document.getElementById(`taskDescription${taskId}`);
+        
+            const taskTitle = titleInput ? titleInput.value : '';
+            const taskDescription = descInput ? descInput.value : '';
+        
+            // Construct the correct URL based on taskId
+            const updateUrl = `/boards/tasks/${taskId}/update/`;
+        
+            fetch(updateUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: new URLSearchParams({
+                    'name': taskTitle,
+                    'description': taskDescription,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Task updated successfully:', data);
+                } else {
+                    console.error('Failed to update task:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating task:', error);
+            });
+        }
+// Helper function to get CSRF token (Django specific)
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
+        }
+    }
+    return '';
+}
+
+
 
         function updateTask(taskId) {
             const newName = document.getElementById(`taskName${taskId}`).value;

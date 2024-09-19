@@ -4,13 +4,13 @@ venv/
 # Ignore environment variable file
 .env
 
-# Ignore Python cache files
-__pycache__/
-*.py[cod]
+# # Ignore Python cache files
+# __pycache__/
+# *.py[cod]
 
-# Ignore Django migrations
-*/migrations/*.py
-*/migrations/*.pyc
+# # Ignore Django migrations
+# */migrations/*.py
+# */migrations/*.pyc
 
 # Ignore database files
 db.sqlite3

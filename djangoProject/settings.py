@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 from os.path import join
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,11 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',
+    # 'users.apps.UsersConfig',
     # 'task_manager.apps.TaskManagerConfig',
-    'reports.apps.ReportsConfig',
+    'reports',
     'dashboard',
-    'task_manager'
+    'task_manager',
+    'users'
 ]
 
 MIDDLEWARE = [
@@ -89,13 +91,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Task_Manager',  # Replace with your database name
-        'USER': 'postgres',  # Replace with your database username
-        'PASSWORD': 'postgres',  # Replace with your database password
-        'HOST': 'localhost',  # Set to 'localhost' or your database server's address
-        'PORT': '5432',  # Default PostgreSQL port
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST'),
+        'PORT': config('DATABASE_PORT'),
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

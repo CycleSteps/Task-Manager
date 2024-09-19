@@ -1,13 +1,13 @@
 import datetime
 import json
 import random
-
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
-
+from django.views.decorators.http import require_POST
 from reports.models import ProjectInfo
 from .models import Task, Project,Subtask, Comment
 from django.views.decorators.csrf import csrf_exempt
@@ -112,7 +112,27 @@ class Tasks(View):
         return redirect('tasks', id=id)
 
 
+@require_POST
+def update_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    new_title = request.POST.get('name')
+    new_description = request.POST.get('description')
 
+    if new_title:
+        task.name = new_title
+    if new_description:
+        task.description = new_description
+
+    task.save()
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Task updated successfully',
+        'name': task.name,
+        'description': task.description,
+    })
+    
+    
 class ManegeTasks(View):
     def post(self, request, id):
         if not request.user.is_authenticated:
