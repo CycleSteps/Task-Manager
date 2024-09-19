@@ -1,0 +1,690 @@
+{% extends 'projects.html' %}
+{% load static %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block css %}
+    <link href="{% static '/plugins/custom/kanban/kanban.bundle.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static '/plugins/custom/fullcalendar/fullcalendar.bundle.css' %}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!--install the offline icon library-->
+
+
+{% endblock %}
+
+{% block body %}
+
+    <!--begin::Content-->
+    <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-12 subheader-transparent" id="kt_subheader">
+            <div class="container d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                <!--begin::Info-->
+                <div class="d-flex align-items-center flex-wrap mr-1">
+                    <!--begin::Heading-->
+                    <div class="d-flex flex-column">
+                        <!--begin::Title-->
+                        <h2 class="text-white font-weight-bold my-2 mr-5">Tasks in "{{ proj.name }}"</h2>
+                        <!--end::Title-->
+                        <!--begin::Breadcrumb-->
+                        <div class="d-flex align-items-center font-weight-bold my-2">
+                            <!--begin::Item-->
+                            <a href="/boards" class="opacity-75 hover-opacity-100">
+                                <i class="flaticon2-shelter text-white icon-1x"></i>
+                            </a>
+                            <!--end::Item-->
+                        </div>
+                        <!--end::Breadcrumb-->
+                    </div>
+                    <!--end::Heading-->
+                </div>
+                <!--end::Info-->
+            </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+            <!--begin::Container-->
+            <div class="container">
+                <!--begin::Card-->
+                <div class="card card-custom gutter-b">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="card-label">Tasks</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="kt_kanban_4"></div>
+                        <div class="mt-4">
+                            {% if can_add %}
+                                <!-- Button  modal-->
+                                <button type="button" class="btn font-weight-bold btn-light-primary mr-5"
+                                        data-toggle="modal"
+                                        data-target="#exampleModal">
+                                    Add Task
+                                </button>
+                                <!-- Modal-->
+                                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                                     aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Add New
+                                                    Task</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <i aria-hidden="true" class="ki ki-close"></i>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="add_board_from" method="post">{% csrf_token %}
+                                                    <div class="form-group">
+                                                        <label>Name
+                                                            <span class="text-danger">*</span></label>
+                                                        <input id="iname" name="name" type="text"
+                                                               class="form-control form-control-lg"
+                                                               placeholder="Task">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description
+                                                            <span class="text-danger">*</span></label>
+                                                        <input id="idesc" name="desc" type="text"
+                                                               class="form-control form-control-lg"
+                                                               placeholder="Details ...">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Select DeadLine
+                                                            <span class="text-danger">*</span></label>
+                                                        <div class="input-group date">
+                                                            <input name="date" type="text"
+                                                                   class="form-control form-control-lg"
+                                                                   id="kt_datepicker_3"/>
+                                                            <div class="input-group-append">
+                                                               <span class="input-group-text">
+                                                                <i class="la la-calendar"></i>
+                                                               </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Select Users
+                                                            <span class="text-danger">*</span></label><br>
+                                                        <select name="users" style="width: 100%" class="form-control form-control-lg select2" id="kt_select2_3" multiple>
+                                                            {% for ou in other_users %}
+                                                                <option value="{{ ou.id }}">{{ ou.username }}</option>
+                                                            {% endfor %}
+                                                        </select>   
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button type="button"
+                                                                class="btn btn-light-primary font-weight-bold"
+                                                                data-dismiss="modal">Close
+                                                        </button>
+                                                        <button id="psubmit" type="submit"
+                                                                class="btn btn-primary font-weight-bold">Save
+                                                            changes
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-custom">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="card-label">
+                                Calendar
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="kt_calendar"></div>
+                    </div>
+                </div>
+                <!--end::Card-->
+
+            </div>
+            <!--end::Container-->
+        </div>
+
+        {% for t in tasks %}
+        <div class="modal fade hidden" id="task-details-{{ t.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            <input type="text" class="form-control" value="{{ t.name }}" id="taskName{{ t.id }}" />
+                        </h5>
+                        <div class="ml-auto">
+                            <i class="fas fa-edit" aria-hidden="true" data-toggle="modal" data-target="#editModal" style="cursor: pointer; font-size: 20px; color: black;"></i>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <i aria-hidden="true" class="ki ki-close"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex flex-column">
+                                <span class="font-weight-bold">{{ t.assigned_to.all|join:", " }}</span>
+                                <span class="text-muted">{{ t.description }}</span>
+                                <span class="label label-inline label-light-info">Start Time: {{ t.start_time }}</span>
+                                <span class="label label-inline label-light-success">End Time: {{ t.end_time }}</span>
+                            </div>
+                        </div>
+                        <h6 class="mt-4">Subtasks</h6>
+                        <div class="progress mt-3">
+                            <div class="progress-bar bg-danger" role="progressbar" id="progressBar{{ t.id }}" style="width: {{ t.subtasks.completed|floatformat:0 }}%;" aria-valuenow="{{ t.subtasks.completed }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                            <ul class="list-unstyled" id="subtaskList{{ t.id }}">
+                                {% for subtask in t.subtasks.all %}
+                                    <li>
+                                        <input type="checkbox" class="subtask-checkbox" id="subtask{{ subtask.id }}"
+                                            onchange="updateSubtaskStatus({{ subtask.id }}, this.checked)" {{ subtask.is_completed|yesno:"checked," }} />
+                                        <label for="subtask{{ subtask.id }}">{{ subtask.description }}</label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            
+                            <input type="text" class="form-control mt-2" placeholder="Add a subtask..." id="subtaskInput{{ t.id }}">
+                            <button class="btn btn-primary mt-2" onclick="addSubtask({{ t.id }})">Add Subtask</button>
+
+                            
+                        <div class="comments mt-4">
+                            <h6>Comments</h6>
+                            <div id="commentsSection{{ t.id }}">
+                                {% for comment in t.comments.all %}
+                                    <div class="comment-item">
+                                        <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <textarea class="form-control mt-2" placeholder="Add a comment..." id="commentInput{{ t.id }}"></textarea>
+                            <button class="btn btn-primary mt-2" onclick="addComment({{ t.id }})">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <!--end::Entry-->
+    </div>
+    <!--end::Content-->
+
+{% endblock %}
+
+{% block js %}
+    <script src="{% static '/plugins/custom/kanban/kanban.bundle.js' %}"></script>
+    <script src="{% static '/plugins/custom/fullcalendar/fullcalendar.bundle.js' %}"></script>
+    <script src="{% static '/js/pages/my-script.js' %}"></script>
+
+    <script>
+
+        function updateTask(taskId) {
+            const newName = document.getElementById(`taskName${taskId}`).value;
+            
+            $.ajax({
+                url: `/tasks/${taskId}/update/`,  // Define the appropriate URL
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    'name': newName,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                }),
+                success: function(response) {
+                    // Handle success (e.g., notify the user, refresh data)
+                },
+                error: function(error) {
+                    console.error("Error updating task:", error);
+                }
+            });
+        }
+
+
+        function addSubtask(taskId) {
+            const subtaskText = document.getElementById(`subtaskInput${taskId}`).value;
+            const csrfToken = '{{ csrf_token }}';
+        
+            if (!subtaskText) return;  // Don't submit empty subtasks
+        
+            $.ajax({
+                url: '{% url "add_subtask" %}',  // Define the appropriate URL
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                data: JSON.stringify({
+                    'task_id': taskId,
+                    'description': subtaskText
+                }),
+                success: function(response) {
+                    console.log("Subtask added successfully:", response);
+                    const subtaskList = document.getElementById(`subtaskList${taskId}`);
+                    subtaskList.innerHTML += `<li>
+                        <input type="checkbox" class="subtask-checkbox" id="subtask${response.subtask_id}" 
+                               onchange="updateSubtaskStatus(${response.subtask_id}, this.checked)" />
+                        <label for="subtask${response.subtask_id}">${response.description}</label>
+                    </li>`;
+                    document.getElementById(`subtaskInput${taskId}`).value = '';  // Clear the input
+                    updateProgressBar(taskId);  // Update progress bar after adding
+                },
+                error: function(error) {
+                    console.error("Error adding subtask:", error);
+                }
+            });
+        }
+        
+        function updateSubtaskStatus(subtaskId, isChecked) {
+            const csrfToken = '{{ csrf_token }}';
+            $.ajax({
+                url: '{% url "update_subtask_status" %}',  // Ensure this URL matches your Django URL
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                data: JSON.stringify({
+                    'subtask_id': subtaskId,
+                    'is_completed': isChecked
+                }),
+                success: function(response) {
+                    console.log("Update successful:", response);
+                    const taskId = response.task_id; // Get the updated task ID
+                    updateProgressBar(taskId);  // Update progress bar after changing subtask status
+                },
+                error: function(error) {
+                    console.error("Error updating subtask status:", error);
+                }
+            });
+        }
+        
+        function updateProgressBar(taskId) {
+            const subtaskList = document.querySelectorAll(`#subtaskList${taskId} .subtask-checkbox`);
+            const total = subtaskList.length;
+            const completed = Array.from(subtaskList).filter(input => input.checked).length;
+            const percentage = total ? (completed / total) * 100 : 0;
+        
+            const progressBar = document.getElementById(`progressBar${taskId}`);
+            progressBar.style.width = `${percentage}%`;
+            progressBar.setAttribute('aria-valuenow', percentage);
+        
+            // Change the color of the progress bar based on the percentage
+            if (percentage === 100) {
+                progressBar.classList.remove('bg-warning', 'bg-danger');
+                progressBar.classList.add('bg-success');  // Fully complete
+            } else if (percentage > 0) {
+                progressBar.classList.remove('bg-success', 'bg-danger');
+                progressBar.classList.add('bg-warning');  // Partially complete
+            } else {
+                progressBar.classList.remove('bg-success', 'bg-warning');
+                progressBar.classList.add('bg-danger');  // Not started
+            }
+        }
+
+        
+        function addComment(taskId) {
+            const commentText = document.getElementById(`commentInput${taskId}`).value;
+            if (!commentText) return;  // Don't submit empty comments
+            
+            $.ajax({
+                url: '{% url "add_comment" %}',  // Your Django URL
+                method: 'POST',
+                contentType: 'application/json',  // Important: Set the content type to JSON
+                data: JSON.stringify({             // Stringify the data
+                    'task_id': taskId,
+                    'text': commentText,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                }),
+                success: function(response) {
+                    // Append the new comment to the comments section
+                    const commentsSection = document.getElementById(`commentsSection${taskId}`);
+                    commentsSection.innerHTML += `<div class="comment-item"><strong>${response.username}:</strong> ${response.text}</div>`;
+                    document.getElementById(`commentInput${taskId}`).value = '';  // Clear the input
+                },
+                error: function(error) {
+                    console.error("Error adding comment:", error);
+                }
+            });
+        }
+
+        "use strict";
+
+        // Class definition
+        var KTKanbanBoardDemo = function () {
+            // Private functions
+            var _demo4 = function () {
+                var kanban = new jKanban({
+                    element: '#kt_kanban_4',
+                    gutter: '0',
+                    click: function (el) {
+                        let eid = $(el).data("eid");
+                        $(`#task-details-${eid}`).modal('show');
+                    },
+                    boards: [
+                        {
+                            'id': 'T',
+                            'title': 'To Do',
+                            'class': 'light-danger',
+                            'item': [
+                                {% for t in tasks %}
+                                    {% if t.status == 'T' %}
+                                        {
+                                            'id': {{ t.id }},
+                                            'title': `
+                                <div class="d-flex align-items-center">
+                        	        {% comment %} <div class="symbol symbol-success mr-3">
+                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                        	        </div> {% endcomment %}
+                        	        <div class="d-flex flex-column align-items-start">
+                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                        	            {% comment %} <span class="label label-inline label-light-dark font-weight-bold">{{t.end_time}}</span> {% endcomment %}
+                        	        </div>
+                        	    </div>`
+                                        },
+                                    {% endif %}
+                                {% endfor %}
+                            ]
+                        },
+                        {
+                            'id': 'D',
+                            'title': 'In Progress',
+                            'class': 'light-primary',
+                            'item': [{% for t in tasks %}
+                                {% if t.status == 'D' %}
+                                    {
+                                        'id': {{ t.id }},
+                                        'title': `
+                                <div class="d-flex align-items-center">
+                        	        {% comment %} <div class="symbol symbol-success mr-3">
+                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                        	        </div> {% endcomment %}
+                        	        <div class="d-flex flex-column align-items-start">
+                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                        	            {% comment %} <span class="label label-inline label-light-success font-weight-bold">{{t.end_time}}</span> {% endcomment %}
+                        	        </div>
+                        	    </div>`
+                                    },
+                                {% endif %}
+                            {% endfor %}
+                            ]
+                        },
+                        {
+                            'id': 'I',
+                            'title': 'In Test',
+                            'class': 'light-primary',
+                            'item': [{% for t in tasks %}
+                                {% if t.status == 'I' %}
+                                    {
+                                        'id': {{ t.id }},
+                                        'title': `
+                                <div class="d-flex align-items-center">
+                        	        {% comment %} <div class="symbol symbol-success mr-3">
+                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                        	        </div> {% endcomment %}
+                        	        <div class="d-flex flex-column align-items-start">
+                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                        	            <span class="label label-inline label-light-warning font-weight-bold">{{t.end_time}}</span>
+                        	        </div>
+                        	    </div>`
+                                    },
+                                {% endif %}
+                            {% endfor %}
+                            ]
+                        },
+                        {
+                            'id': 'O',
+                            'title': 'Done',
+                            'class': 'light-success',
+                            'item': [{% for t in tasks %}
+                                {% if t.status == 'O' %}
+                                    {
+                                        'id': {{ t.id }},
+                                        'title': `
+                                <div class="d-flex align-items-center">
+                        	        {% comment %} <div class="symbol symbol-success mr-3">
+                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                        	        </div> {% endcomment %}
+                        	        <div class="d-flex flex-column align-items-start">
+                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                        	            {% comment %} <span class="label label-inline label-light-primary font-weight-bold">{{t.end_time}}</span> {% endcomment %}
+                        	        </div>
+                        	    </div>`
+                                    },
+                                {% endif %}
+                            {% endfor %}
+                            ]
+                        },
+                        {
+                            'id': 'B',
+                            'title': 'Blocked',
+                            'class': 'light-danger',
+                            'item': [{% for t in tasks %}
+                                {% if t.status == 'B' %}
+                                    {
+                                        'id': {{ t.id }},
+                                        'title': `
+                                <div class="d-flex align-items-center">
+                        	        {% comment %} <div class="symbol symbol-success mr-3">
+                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                        	        </div> {% endcomment %}
+                        	        <div class="d-flex flex-column align-items-start">
+                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                        	            {% comment %} <span class="label label-inline label-light-danger font-weight-bold">{{t.end_time}}</span> {% endcomment %}
+                        	        </div>
+                        	    </div>`
+                                    },
+                                {% endif %}
+                            {% endfor %}
+                            ]
+                        },
+                        {
+                            'id': 'L',
+                            'title': 'Deleted',
+                            'class': 'light-dark',
+                            'item': [{% for t in tasks %}
+                                {% if t.status == 'L' %}
+                                    {
+                                        'id': {{ t.id }},
+                                        'title': `
+                                <div class="d-flex align-items-center">
+                        	        {% comment %} <div class="symbol symbol-success mr-3">
+                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                        	        </div> {% endcomment %}
+                        	        <div class="d-flex flex-column align-items-start">
+                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                        	            {% comment %} <span class="label label-inline label-light-danger font-weight-bold">{{t.end_time}}</span> {% endcomment %}
+                        	        </div>
+                        	    </div>`
+                                    },
+                                {% endif %}
+                            {% endfor %}
+                            ]
+                        }
+                    ],
+                    dragendEl: function (el) {
+                        let eid = $(el).data("eid");
+                        let bid = $(el.parentElement.parentElement).data("id");
+                        jQuery.ajax(`/boards/${eid}/task`, {
+                            headers: {"X-CSRFToken": $(`{% csrf_token %}`).val()},
+                            type: 'POST',
+                            data: {
+                                "_token": "{{ csrf_token }}",
+                                type: "edit_status",
+                                task_id: eid,
+                                board_id: bid
+                            },
+                            error: (data) => {
+                                $('[data-switch=true]').bootstrapSwitch();
+                                let content = {};
+                                content.message = data.responseJSON.error;
+                                $.notify(content, {
+                                    type: 'danger',
+                                    placement: {
+                                        from: 'bottom',
+                                        align: 'left'
+                                    },
+                                    offset: {
+                                        x: 30,
+                                        y: 30
+                                    },
+                                });
+                            }
+                        });
+                    },
+                });
+            }
+
+            // Public functions
+            return {
+                init: function () {
+                    _demo4();
+                }
+            };
+        }();
+
+        var KTCalendarBasic = function () {
+
+            return {
+                //main function to initiate the module
+                init: function () {
+                    var todayDate = moment().startOf('day');
+                    var YM = todayDate.format('YYYY-MM');
+                    var YESTERDAY = todayDate.clone().subtract(1, 'day').format('YYYY-MM-DD');
+                    var TODAY = todayDate.format('YYYY-MM-DD');
+                    var TOMORROW = todayDate.clone().add(1, 'day').format('YYYY-MM-DD');
+
+                    var calendarEl = document.getElementById('kt_calendar');
+                    var calendar = new FullCalendar.Calendar(calendarEl, {
+                        plugins: ['bootstrap', 'interaction', 'dayGrid', 'timeGrid', 'list'],
+                        themeSystem: 'bootstrap',
+
+                        isRTL: KTUtil.isRTL(),
+
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        },
+
+                        height: 800,
+                        contentHeight: 780,
+                        aspectRatio: 3,  // see: https://fullcalendar.io/docs/aspectRatio
+
+                        nowIndicator: true,
+                        {#now: TODAY + 'T09:25:00', // just for demo#}
+
+                        views: {
+                            dayGridMonth: {buttonText: 'month'},
+                            timeGridWeek: {buttonText: 'week'},
+                            timeGridDay: {buttonText: 'day'}
+                        },
+
+                        defaultView: 'dayGridMonth',
+                        defaultDate: TODAY,
+
+                        editable: true,
+                        eventLimit: true, // allow "more" link when too many events
+                        navLinks: true,
+                        events: [
+                            {% for t in tasks %}
+                                {
+                                    id: '{{ t.id }}',
+                                    title: '{{t.name}}',
+                                    start: new Date('{{ t.end_time }}'),
+                                    end: new Date('{{ t.end_time }}'),
+                                    description: '{{t.description}}',
+                                    {% if t.status == 'T' %}
+                                        className: "fc-event-solid-warning fc-event-light",
+                                    {% endif %}
+                                    {% if t.status == 'D' %}
+                                        className: "fc-event-solid-primary fc-event-light",
+                                    {% endif %}
+                                    {% if t.status == 'I' %}
+                                        className: "fc-event-solid-info fc-event-light",
+                                    {% endif %}
+                                    {% if t.status == 'O' %}
+                                        className: "fc-event-solid-success fc-event-light",
+                                    {% endif %}
+                                    {% if t.status == 'B' %}
+                                        className: "fc-event-solid-danger fc-event-light",
+                                    {% endif %}
+                                    {% if t.status == 'L' %}
+                                        className: "fc-event-solid-dark  fc-event-light",
+                                    {% endif %}
+                                },
+                            {% endfor %}
+                        ],
+
+                        eventDrop: function (info) {
+                            let id = info.event.id;
+                            let year = info.event.start.getFullYear();
+                            let month = info.event.start.getMonth() + 1;
+                            let day = info.event.start.getDate()
+                            console.log(id, `${year}-${month}-${day}`)
+
+                            jQuery.ajax(`/boards/${id}/task`, {
+                                headers: {"X-CSRFToken": $(`{% csrf_token %}`).val()},
+                                type: 'POST',
+                                data: {
+                                    "_token": "{{ csrf_token }}",
+                                    type: "edit_end_time",
+                                    task_id: id,
+                                    new_end_time: `${year}-${month}-${day}`
+                                },
+                                error: (data) => {
+                                    $('[data-switch=true]').bootstrapSwitch();
+                                    let content = {};
+                                    content.message = data.responseJSON.error;
+                                    $.notify(content, {
+                                        type: 'danger',
+                                        placement: {
+                                            from: 'bottom',
+                                            align: 'left'
+                                        },
+                                        offset: {
+                                            x: 30,
+                                            y: 30
+                                        },
+                                    });
+                                }
+                            });
+                        },
+
+                        eventRender: function (info) {
+                            var element = $(info.el);
+
+                            if (info.event.extendedProps && info.event.extendedProps.description) {
+                                if (element.hasClass('fc-day-grid-event')) {
+                                    element.data('content', info.event.extendedProps.description);
+                                    element.data('placement', 'top');
+                                    KTApp.initPopover(element);
+                                } else if (element.hasClass('fc-time-grid-event')) {
+                                    element.find('.fc-title').append('<div class="fc-description">' + info.event.extendedProps.description + '</div>');
+                                } else if (element.find('.fc-list-item-title').lenght !== 0) {
+                                    element.find('.fc-list-item-title').append('<div class="fc-description">' + info.event.extendedProps.description + '</div>');
+                                }
+                            }
+                        }
+                    });
+
+                    calendar.render();
+                }
+            };
+        }();
+
+        jQuery(document).ready(function () {
+            KTKanbanBoardDemo.init();
+            KTCalendarBasic.init();
+        });
+
+    </script>
+{% endblock %}
