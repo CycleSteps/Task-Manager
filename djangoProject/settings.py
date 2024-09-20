@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     # 'users.apps.UsersConfig',
     # 'task_manager.apps.TaskManagerConfig',
@@ -44,7 +45,7 @@ INSTALLED_APPS = [
     'task_manager',
     'users',
     'chatbox',
-    'channels'
+    'channels',
 ]
 
 ASGI_APPLICATION = 'djangoProject.asgi.application'
@@ -53,7 +54,7 @@ ASGI_APPLICATION = 'djangoProject.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    }
+    },
 }
 
 
