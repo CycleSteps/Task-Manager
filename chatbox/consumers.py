@@ -1,4 +1,3 @@
-# chatbox/consumers.py
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from asgiref.sync import sync_to_async
@@ -6,9 +5,8 @@ from django.contrib.auth.models import User
 from .models import Chat
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    
+
     async def connect(self):
-        # Define a consistent room naming scheme, e.g., alphabetical order
         self.room_name = '-'.join(sorted([self.scope['user'].username, self.scope['url_route']['kwargs']['room_name']]))
         self.room_group_name = f'chat_{self.room_name}'
 

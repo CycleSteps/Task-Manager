@@ -729,43 +729,42 @@
                     </div> 
                 </div>
                 
-                    <section class="message-area">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="chat-area">
-                                        <!-- chatlist -->
-                                        <div class="chatlist">
-                                            <div class="modal-dialog-scrollable">
-                                                <div class="modal-content">
-                                                    <div class="chat-header">
-                                                        <div class="msg-search">
-                                                            <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Search" aria-label="search">
-                                                            <a class="add" href="#"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/add.svg" alt="add"></a>
-                                                        </div>
-                    
-                                                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                                                            <li class="nav-item" role="presentation">
-                                                                <button class="nav-link active" id="Open-tab" data-bs-toggle="tab" data-bs-target="#Open" type="button" role="tab" aria-controls="Open" aria-selected="true">Chat</button>
-                                                            </li>
-                                                        </ul>
+                <section class="message-area">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chat-area">
+                                    <!-- chatlist -->
+                                    <div class="chatlist">
+                                        <div class="modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="chat-header">
+                                                    <div class="msg-search">
+                                                        <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Search" aria-label="search">
+                                                        <a class="add" href="#"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/add.svg" alt="add"></a>
                                                     </div>
-                                                    <div class="modal-body">
-                                                        <div class="chat-lists">
-                                                            <div class="tab-content" id="myTabContent">
-                                                                <div class="tab-pane fade show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
-                                                                    <div class="chat-list">
-                                                                        {% for user in users %}
-                                                                            <a href="#" class="d-flex align-items-center" onclick="loadChat('{{ user.username }}')">
-                                                                                <div class="flex-shrink-0">
-                                                                                    <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
-                                                                                    <span class="active"></span>
-                                                                                </div>
-                                                                                <h3>{{ user.username }}</h3>
-                                                                                <p>{{ user.email }}</p>
-                                                                            </a>
-                                                                        {% endfor %}
-                                                                    </div>
+                
+                                                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link active" id="Open-tab" data-bs-toggle="tab" data-bs-target="#Open" type="button" role="tab" aria-controls="Open" aria-selected="true">Chat</button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="chat-lists">
+                                                        <div class="tab-content" id="myTabContent">
+                                                            <div class="tab-pane fade show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
+                                                                <div class="chat-list">
+                                                                    {% for user in users %}
+                                                                        <a href="#" class="d-flex align-items-center" onclick="startChatting('{{ user.username }}')">
+                                                                            <div class="flex-shrink-0">
+                                                                                <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
+                                                                                {% comment %} <span class="active"></span> {% endcomment %}
+                                                                            </div>
+                                                                            <h3>{{ user.username }}</h3>
+                                                                            {% comment %} <p>{{ user.email }}</p> {% endcomment %}
+                                                                        </a>
+                                                                    {% endfor %}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -773,48 +772,49 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- chatlist -->
-                                        <!-- chatbox -->
-                                        <div class="chatbox">
-                                            <div class="modal-dialog-scrollable">
-                                                <div class="modal-content">
-                                                    <div class="msg-head">
-                                                        <div class="row">
-                                                            <div class="col-8">
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="chat-icon"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/arroleftt.svg" alt="image title"></span>
-                                                                    <div class="flex-shrink-0">
-                                                                        <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
-                                                                    </div>
-                                                                    <div class="flex-grow-1 ms-3">
-                                                                        <h3 id="chat-user-name">User Name</h3>
-                                                                        <p>front end developer</p>
-                                                                    </div>
+                                    </div>
+                                    <!-- chatlist -->
+                                    <!-- chatbox -->
+                                    <div class="chatbox">
+                                        <div class="modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="msg-head">
+                                                    <div class="row">
+                                                        <div class="col-8">
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="chat-icon"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/arroleftt.svg" alt="image title"></span>
+                                                                <div class="flex-shrink-0">
+                                                                    {% comment %} <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img"> {% endcomment %}
+                                                                </div>
+                                                                <div class="flex-grow-1 ms-3">
+                                                                    <h3 id="chat-user-name">Chat With Anyone You Want</h3>
+                                                                    <p>select users that you want to chat with</p>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-body">
-                                                        <div class="msg-body">
-                                                            <ul id="chat-messages">
-                                                                <!-- Messages will be appended here -->
-                                                            </ul>
-                                                        </div>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="msg-body">
+                                                        <ul id="chat-messages">
+                                                            <!-- Messages will be appended here -->
+                                                        </ul>
                                                     </div>
-                                                    <div class="send-box">
-                                                        <form action="">
-                                                            <input type="text" class="form-control" aria-label="message…" placeholder="Write message…" id="message-input">
-                                                            <button type="button" id="send-btn"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</button>
-                                                        </form>
-                                                    </div>
+                                                </div>
+                                                <div class="send-box">
+                                                    <form action="">
+                                                        <input type="text" class="form-control" aria-label="message…" placeholder="Write message…" id="message-input">
+                                                        <button type="button" id="send-btn"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>                  
-                    </section>
+                        </div>
+                    </div>
+                </section>
                 {% endblock %}
                 
 
@@ -1002,22 +1002,39 @@
     let targetUser = null;
     let roomName = null;
     let chatSocket = null;
+    let chatInterval = null;
 
     const currentUser = "{{ current_user.username }}";
 
-    function loadChat(target) {
+    function startChatting(target) {
         targetUser = target;
         roomName = [currentUser, targetUser].sort().join('-');
 
         // Update the chat header
         document.getElementById('chat-user-name').innerText = targetUser;
 
+        // Stop any previous interval for chat polling
+        if (chatInterval) {
+            clearInterval(chatInterval);
+        }
+
+        // Load chat initially and then set up polling
+        loadChat();
+        chatInterval = setInterval(loadChat, 3000);  // Repeat every 5 seconds
+
+        // Initialize WebSocket for real-time messaging
+        initWebSocket();
+    }
+
+    function loadChat() {
+        if (!targetUser) return;  // Ensure there's a selected user
+
         // Load existing chat history from the server
         fetch(`/chatbox/load-chat-history/${targetUser}/`)
             .then(response => response.json())
             .then(data => {
                 const chatBox = document.getElementById('chat-messages');
-                chatBox.innerHTML = '';
+                chatBox.innerHTML = '';  // Clear previous messages
                 data.forEach(msg => {
                     appendMessage(msg.sender, msg.message, msg.timestamp);
                 });
@@ -1026,9 +1043,6 @@
             .catch(error => {
                 console.error('Fetch error:', error);
             });
-
-        // Initialize WebSocket for real-time messaging
-        initWebSocket();
     }
 
     function initWebSocket() {
@@ -1082,10 +1096,13 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Close the WebSocket connection when navigating away from the page
+    // Close the WebSocket connection and polling when navigating away from the page
     window.onbeforeunload = function() {
         if (chatSocket) {
             chatSocket.close();
+        }
+        if (chatInterval) {
+            clearInterval(chatInterval);
         }
     };
 </script>
