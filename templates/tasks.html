@@ -213,7 +213,7 @@
                             <h5 id="taskTitleDisplay{{ t.id }}" class="task-title" onclick="makeTitleEditable({{ t.id }})">{{ t.name }}</h5>
                             <input name="name" type="text" class="form-control d-none" id="taskName{{ t.id }}" value="{{ t.name }}" onblur="saveTaskTitle({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'title')" />
                             <div class="ml-auto">
-                                <i class="fas fa-edit" aria-hidden="true" style="cursor: pointer; font-size: 20px; color: #007bff;" onclick="updateTask({{ t.id }})"></i>
+                                <i class="fas fa-edit" aria-hidden="true" style="cursor: pointer; font-size: 20px; color: #007bff;" onclick="updateTaskName({{ t.id }})"></i>
                             </div>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <i aria-hidden="true" class="ki ki-close"></i>
@@ -239,9 +239,9 @@
                             </div>
             
                             <h6 class="mt-4">Subtasks</h6>
-                            {% comment %} <div class="progress mb-3">
+                           {% comment %} <div class="progress mb-3">
                                 <div class="progress-bar bg-danger" role="progressbar" id="progressBar{{ t.id }}" style="width: {{ t.subtasks.completed|floatformat:0 }}%;" aria-valuenow="{{ t.subtasks.completed }}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div> {% endcomment %}
+                            </div>  {% endcomment %}
                             
                             <ul class="list-unstyled mb-4" id="subtaskList{{ t.id }}">
                                 {% for subtask in t.subtasks.all %}
@@ -287,6 +287,8 @@
 
     <script>
 
+        
+
                 
         // Function to make the task title editable
         function makeTitleEditable(taskId) {
@@ -311,7 +313,7 @@
             titleDisplay.classList.remove('d-none');
             
             // Optionally send AJAX request to update the server
-            updateTask(taskId);
+            updateTaskName(taskId);
         }
 
         // Function to make the description editable
@@ -337,7 +339,7 @@
             descDisplay.classList.remove('d-none');
             
             // Optionally send AJAX request to update the server
-            updateTask(taskId);
+            updateTaskName(taskId);
         }
 
         // Function to handle saving when the user presses Enter
@@ -352,72 +354,56 @@
             }
         }
         
-        function updateTask(taskId) {
-            const titleInput = document.getElementById(`taskName${taskId}`);
-            const descInput = document.getElementById(`taskDescription${taskId}`);
+        function updateTaskName(taskId) {
+            console.log('@@@@@@@@@@@@2',getCSRFToken())
+            var titleInput = document.getElementById('taskName' + taskId);
+            var descInput = document.getElementById('taskDescription' + taskId);
         
-            const taskTitle = titleInput ? titleInput.value : '';
-            const taskDescription = descInput ? descInput.value : '';
+            var taskTitle = titleInput ? titleInput.value : '';
+            var taskDescription = descInput ? descInput.value : '';
         
-            // Construct the correct URL based on taskId
-            const updateUrl = `/boards/tasks/${taskId}/update/`;
+            const updateUrl = "{% url 'tasks' 0 %}".replace('0', taskId); 
+            
         
             fetch(updateUrl, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),  // Include CSRF token
                 },
-                body: new URLSearchParams({
-                    'name': taskTitle,
-                    'description': taskDescription,
-                }),
+                body: JSON.stringify({
+                    task_id: taskId,
+                    name: taskTitle,
+                    description: taskDescription
+                })
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
                 if (data.success) {
                     console.log('Task updated successfully:', data);
                 } else {
                     console.error('Failed to update task:', data.message);
                 }
             })
-            .catch(error => {
+            .catch(function(error) {
                 console.error('Error updating task:', error);
             });
         }
-// Helper function to get CSRF token (Django specific)
-function getCSRFToken() {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith('csrftoken=')) {
-            return cookie.substring('csrftoken='.length, cookie.length);
-        }
-    }
-    return '';
-}
-
-
-
-        function updateTask(taskId) {
-            const newName = document.getElementById(`taskName${taskId}`).value;
-            
-            $.ajax({
-                url: `/tasks/${taskId}/update/`,  // Define the appropriate URL
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    'name': newName,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                }),
-                success: function(response) {
-                    // Handle success (e.g., notify the user, refresh data)
-                },
-                error: function(error) {
-                    console.error("Error updating task:", error);
+        
+        // CSRF Token Helper Function (Django-specific)
+        function getCSRFToken() {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    return cookie.substring('csrftoken='.length, cookie.length);
                 }
-            });
+            }
+            return '';
         }
+        
 
 
         function addSubtask(taskId) {
@@ -858,4 +844,5 @@ function getCSRFToken() {
         });
 
     </script>
+    
 {% endblock %}

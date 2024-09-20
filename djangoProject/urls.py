@@ -22,7 +22,8 @@ urlpatterns = [
     path('', include('users.urls')),
     path('boards/', include('task_manager.urls')),
     path('report/', include('reports.urls')),
-    path('dashboard/', include('dashboard.urls'))
+    path('dashboard/', include('dashboard.urls')),
+    path('chatbox/', include('chatbox.urls')),
 ]
 
 # handler404 = 'djangoProject.errorViews.handler404'

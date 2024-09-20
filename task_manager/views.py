@@ -13,6 +13,9 @@ from .models import Task, Project,Subtask, Comment
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 
 class Projects(View):
@@ -68,8 +71,10 @@ class MangeProject(View):
         return response
 
 
-
+# @method_decorator(csrf_exempt, name='dispatch')
 class Tasks(View):
+    http_method_names = ['get', 'post', 'put']  # Add PUT to allowed methods
+
     def get(self, request, id):
         if not request.user.is_authenticated:
             return redirect("signIn")
@@ -85,7 +90,6 @@ class Tasks(View):
             'proj': proj,
             "can_add": user == proj.owner
         }
-        print(data['tasks'],"@@@@@@@@@@@@@")
         return render(request, 'tasks.html', data)
 
     def post(self, request, id):
@@ -111,12 +115,33 @@ class Tasks(View):
 
         return redirect('tasks', id=id)
 
+    def put(self, request, id):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-@require_POST
+        # Parse the JSON body from the PUT request
+        body = json.loads(request.body.decode('utf-8'))
+
+        task_id = body.get('task_id')
+        name = body.get('name')
+        description = body.get('description')
+
+        task = Task.objects.filter(id=task_id, project_id=id).first()
+
+        if task:
+            task.name = name
+            task.description = description
+
+            task.save()
+            return render(request, 'tasks.html')
+        else:
+           return render(request, 'tasks.html')
+
+@api_view(['POST'])
 def update_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-    new_title = request.POST.get('name')
-    new_description = request.POST.get('description')
+    new_title = request.data.get('name')
+    new_description = request.data.get('description')
 
     if new_title:
         task.name = new_title
@@ -125,7 +150,7 @@ def update_task(request, task_id):
 
     task.save()
 
-    return JsonResponse({
+    return Response({
         'success': True,
         'message': 'Task updated successfully',
         'name': task.name,

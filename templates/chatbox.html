@@ -1,0 +1,1120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Boards{% endblock %}
+
+
+{% block content %}
+
+
+<style>
+   
+    
+   
+    
+    ol,
+    ul {
+        list-style: none;
+    }
+    
+    blockquote,
+    q {
+        quotes: none;
+    }
+    
+    blockquote:before,
+    blockquote:after,
+    q:before,
+    q:after {
+        content: '';
+        content: none;
+    }
+    
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    
+    
+    /********************************
+     Typography Style
+    ******************************** */
+    
+    body {
+        margin: 0;
+        font-family: 'Open Sans', sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+   
+    
+    h1 {
+        font-size: 36px;
+    }
+    
+    h2 {
+        font-size: 30px;
+    }
+    
+    h3 {
+        font-size: 26px;
+    }
+    
+    h4 {
+        font-size: 22px;
+    }
+    
+    h5 {
+        font-size: 18px;
+    }
+    
+    h6 {
+        font-size: 16px;
+    }
+    
+    p {
+        font-size: 15px;
+    }
+    
+    a {
+        text-decoration: none;
+        font-size: 15px;
+    }
+    
+    * {
+      margin-bottom: 0;
+    }
+    
+    
+    /* *******************************
+    message-area
+    ******************************** */
+    
+    .message-area {
+        height: 100vh;
+        overflow: hidden;
+        padding: 30px 0;
+        background: #f5f5f5;
+    }
+    
+    .chat-area {
+        position: relative;
+        width: 100%;
+        background-color: #fff;
+        border-radius: 0.3rem;
+        height: 90vh;
+        overflow: hidden;
+        min-height: calc(100% - 1rem);
+    }
+    
+    .chatlist {
+        outline: 0;
+        height: 100%;
+        overflow: hidden;
+        width: 300px;
+        float: left;
+        padding: 15px;
+    }
+    
+    .chat-area .modal-content {
+        border: none;
+        border-radius: 0;
+        outline: 0;
+        height: 100%;
+    }
+    
+    .chat-area .modal-dialog-scrollable {
+        height: 100% !important;
+    }
+    
+    .chatbox {
+        width: auto;
+        overflow: hidden;
+        height: 100%;
+        border-left: 1px solid #ccc;
+    }
+    
+    .chatbox .modal-dialog,
+    .chatlist .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .msg-search {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .chat-area .form-control {
+        display: block;
+        width: 80%;
+        padding: 0.375rem 0.75rem;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #222;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ccc;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 0.25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    
+    .chat-area .form-control:focus {
+        outline: 0;
+        box-shadow: inherit;
+    }
+    
+    a.add img {
+        height: 36px;
+    }
+    
+    .chat-area .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: inherit;
+    }
+    
+    .chat-area .nav-tabs .nav-item {
+        width: 100%;
+    }
+    
+    .chat-area .nav-tabs .nav-link {
+        width: 100%;
+        color: #180660;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.5;
+        text-transform: capitalize;
+        margin-top: 5px;
+        margin-bottom: -1px;
+        background: 0 0;
+        border: 1px solid transparent;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+    }
+    
+    .chat-area .nav-tabs .nav-item.show .nav-link,
+    .chat-area .nav-tabs .nav-link.active {
+        color: #222;
+        background-color: #fff;
+        border-color: transparent transparent #000;
+    }
+    
+    .chat-area .nav-tabs .nav-link:focus,
+    .chat-area .nav-tabs .nav-link:hover {
+        border-color: transparent transparent #000;
+        isolation: isolate;
+    }
+    
+    .chat-list h3 {
+        color: #222;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.5;
+        text-transform: capitalize;
+        margin-bottom: 0;
+    }
+    
+    .chat-list p {
+        color: #343434;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        text-transform: capitalize;
+        margin-bottom: 0;
+    }
+    
+    .chat-list a.d-flex {
+        margin-bottom: 15px;
+        position: relative;
+        text-decoration: none;
+    }
+    #kt_wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    
+    .d-flex.flex-column.flex-root {
+        min-height: 100vh;
+    }
+    .chat-list .active {
+        display: block;
+        content: '';
+        clear: both;
+        position: absolute;
+        bottom: 3px;
+        left: 34px;
+        height: 12px;
+        width: 12px;
+        background: #00DB75;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+    
+    .msg-head h3 {
+        color: #222;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.5;
+        margin-bottom: 0;
+    }
+    
+    .msg-head p {
+        color: #343434;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        text-transform: capitalize;
+        margin-bottom: 0;
+    }
+    
+    .msg-head {
+        padding: 15px;
+        border-bottom: 1px solid #ccc;
+    }
+    
+    .moreoption {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+    }
+    
+    .moreoption .navbar {
+        padding: 0;
+    }
+    
+    .moreoption li .nav-link {
+        color: #222;
+        font-size: 16px;
+    }
+    
+    .moreoption .dropdown-toggle::after {
+        display: none;
+    }
+    
+    .moreoption .dropdown-menu[data-bs-popper] {
+        top: 100%;
+        left: auto;
+        right: 0;
+        margin-top: 0.125rem;
+    }
+    
+    .msg-body ul {
+        overflow: hidden;
+    }
+    
+    .msg-body ul li {
+        list-style: none;
+        margin: 15px 0;
+    }
+    
+    .msg-body ul li.sender {
+        display: block;
+        width: 100%;
+        position: relative;
+    }
+    
+    .msg-body ul li.sender:before {
+        display: block;
+        clear: both;
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: -7px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 12px 15px 12px;
+        border-color: transparent transparent #f5f5f5 transparent;
+        -webkit-transform: rotate(-37deg);
+        -ms-transform: rotate(-37deg);
+        transform: rotate(-37deg);
+    }
+    
+    .msg-body ul li.sender p {
+        color: #000;
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 400;
+        padding: 15px;
+        background: #f5f5f5;
+        display: inline-block;
+        border-bottom-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        margin-bottom: 0;
+    }
+    
+    .msg-body ul li.sender p b {
+        display: block;
+        color: #180660;
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 500;
+    }
+    
+    .msg-body ul li.repaly {
+        display: block;
+        width: 100%;
+        text-align: right;
+        position: relative;
+    }
+    
+    .msg-body ul li.repaly:before {
+        display: block;
+        clear: both;
+        content: '';
+        position: absolute;
+        bottom: 15px;
+        right: -7px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 12px 15px 12px;
+        border-color: transparent transparent #4b7bec transparent;
+        -webkit-transform: rotate(37deg);
+        -ms-transform: rotate(37deg);
+        transform: rotate(37deg);
+    }
+    
+    .msg-body ul li.repaly p {
+        color: #fff;
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 400;
+        padding: 15px;
+        background: #4b7bec;
+        display: inline-block;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border-bottom-left-radius: 10px;
+        margin-bottom: 0;
+    }
+    
+    .msg-body ul li.repaly p b {
+        display: block;
+        color: #061061;
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 500;
+    }
+    
+    .msg-body ul li.repaly:after {
+        display: block;
+        content: '';
+        clear: both;
+    }
+    
+    .time {
+        display: block;
+        color: #000;
+        font-size: 12px;
+        line-height: 1.5;
+        font-weight: 400;
+    }
+    
+    li.repaly .time {
+        margin-right: 20px;
+    }
+    
+    .divider {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+    
+    .msg-body h6 {
+        text-align: center;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #222;
+        background: #fff;
+        display: inline-block;
+        padding: 0 5px;
+        margin-bottom: 0;
+    }
+    
+    .divider:after {
+        display: block;
+        content: '';
+        clear: both;
+        position: absolute;
+        top: 12px;
+        left: 0;
+        border-top: 1px solid #EBEBEB;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    
+    .send-box {
+        padding: 15px;
+        border-top: 1px solid #ccc;
+    }
+    
+    .send-box form {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    
+    .send-box .form-control {
+        display: block;
+        width: 85%;
+        padding: 0.375rem 0.75rem;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #222;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ccc;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 0.25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    
+    .send-box button {
+        border: none;
+        background: #3867d6;
+        padding: 0.375rem 5px;
+        color: #fff;
+        border-radius: 0.25rem;
+        font-size: 14px;
+        font-weight: 400;
+        width: 24%;
+        margin-left: 1%;
+    }
+    
+    .send-box button i {
+        margin-right: 5px;
+    }
+    
+    .send-btns .button-wrapper {
+        position: relative;
+        width: 125px;
+        height: auto;
+        text-align: left;
+        margin: 0 auto;
+        display: block;
+        background: #F6F7FA;
+        border-radius: 3px;
+        padding: 5px 15px;
+        float: left;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        overflow: hidden;
+    }
+    
+    .send-btns .button-wrapper span.label {
+        position: relative;
+        z-index: 1;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+        color: #343945;
+        font-weight: 400;
+        text-transform: capitalize;
+        font-size: 13px;
+    }
+    
+    #upload {
+        display: inline-block;
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .send-btns .attach .form-control {
+        display: inline-block;
+        width: 120px;
+        height: auto;
+        padding: 5px 8px;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #343945;
+        background-color: #F6F7FA;
+        background-clip: padding-box;
+        border: 1px solid #F6F7FA;
+        border-radius: 3px;
+        margin-bottom: 5px;
+    }
+    
+    .send-btns .button-wrapper span.label img {
+        margin-right: 5px;
+    }
+    
+    .button-wrapper {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        text-align: center;
+        margin: 0 auto;
+    }
+    
+    button:focus {
+        outline: 0;
+    }
+    
+    .add-apoint {
+        display: inline-block;
+        margin-left: 5px;
+    }
+    
+    .add-apoint a {
+        text-decoration: none;
+        background: #F6F7FA;
+        border-radius: 8px;
+        padding: 8px 8px;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.2;
+        color: #343945;
+    }
+    
+    .add-apoint a svg {
+        margin-right: 5px;
+    }
+    
+    .chat-icon {
+        display: none;
+    }
+    
+    .closess i {
+        display: none;
+    }
+    
+    
+    
+    @media (max-width: 767px) {
+        .chat-icon {
+            display: block;
+            margin-right: 5px;
+        }
+        .chatlist {
+            width: 100%;
+        }
+        .chatbox {
+            width: 100%;
+            position: absolute;
+            left: 1000px;
+            right: 0;
+            background: #fff;
+            transition: all 0.5s ease;
+            border-left: none;
+        }
+        .showbox {
+            left: 0 !important;
+            transition: all 0.5s ease;
+        }
+        .msg-head h3 {
+            font-size: 14px;
+        }
+        .msg-head p {
+            font-size: 12px;
+        }
+        .msg-head .flex-shrink-0 img {
+            height: 30px;
+        }
+        .send-box button {
+            width: 28%;
+        }
+        .send-box .form-control {
+            width: 70%;
+        }
+        .chat-list h3 {
+            font-size: 14px;
+        }
+        .chat-list p {
+            font-size: 12px;
+        }
+        .msg-body ul li.sender p {
+            font-size: 13px;
+            padding: 8px;
+            border-bottom-left-radius: 6px;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+        .msg-body ul li.repaly p {
+            font-size: 13px;
+            padding: 8px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+    }
+      
+</style>
+
+    <!--begin::Header Mobile-->
+    <div id="kt_header_mobile" class="header-mobile">
+        <div class="d-flex align-items-center justify-content-between">
+            <button class="btn p-0 burger-icon burger-icon-left" id="kt_header_mobile_toggle">
+                <span></span>
+            </button>
+            <button class="btn btn-icon btn-hover-transparent-white p-0" id="kt_header_mobile_topbar_toggle">
+                <span class="svg-icon svg-icon-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
+                        <g fill="none" fill-rule="evenodd">
+                            <path d="M12,11 C9.790861,11 8,9.209139 8,7 C8,4.790861 9.790861,3 12,3 C14.209139,3 16,4.790861 16,7 C16,9.209139 14.209139,11 12,11 Z" fill="#000000" opacity="0.3"/>
+                            <path d="M3.00065168,20.1992055 C3.38825852,15.4265159 7.26191235,13 11.9833413,13 C16.7712164,13 20.7048837,15.2931929 20.9979143,20.2 C21.0095879,20.3954741 20.9979143,21 20.2466999,21 C16.541124,21 11.0347247,21 3.72750223,21 C3.47671215,21 2.97953825,20.45918 3.00065168,20.1992055 Z" fill="#000000"/>
+                        </g>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column flex-root">
+        <div class="d-flex flex-row flex-column-fluid page">
+            <div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+                <div id="kt_header" class="header header-fixed">
+                    <div class="container d-flex align-items-center justify-content-between">
+                        <div class="topbar">
+                            <div class="dropdown">
+                                <div class="topbar-item">
+                                    <div class="btn btn-icon btn-hover-transparent-white d-flex align-items-center btn-lg" id="kt_quick_user_toggle">
+                                        <span class="text-white opacity-70 font-weight-bold font-size-base d-none d-md-inline">Hi,</span>
+                                        <span class="text-white opacity-90 font-weight-bolder font-size-base d-none d-md-inline">{{ user.username }}</span>
+                                        <span class="symbol symbol-35">
+                                            <span class="symbol-label text-white font-size-h5 font-weight-bold bg-white-o-30">{{ first }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% block body %}
+                <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+                    <div class="subheader py-2 py-lg-12 subheader-transparent" id="kt_subheader">
+                        <div class="container d-flex align-items-center justify-content-between flex-wrap">
+                            <div class="d-flex flex-column">
+                                <h2 class="text-white font-weight-bold my-2">Chat</h2>
+                                {% comment %} <h5 class="text-success font-weight-bold">Create your Boards, Teams or Projects Here</h5> {% endcomment %}
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <a href="/boards" class="btn btn-transparent-white font-weight-bold py-3 px-6">Go To Task</a>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                
+                <section class="message-area">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chat-area">
+                                    <!-- chatlist -->
+                                    <div class="chatlist">
+                                        <div class="modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="chat-header">
+                                                    <div class="msg-search">
+                                                        <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Search" aria-label="search">
+                                                        <a class="add" href="#"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/add.svg" alt="add"></a>
+                                                    </div>
+
+                                                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link active" id="Open-tab" data-bs-toggle="tab" data-bs-target="#Open" type="button" role="tab" aria-controls="Open" aria-selected="true">Chat</button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- chat-list -->
+                                                    <div class="chat-lists">
+                                                        <div class="tab-content" id="myTabContent">
+                                                            <div class="tab-pane fade show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
+                                                                <!-- chat-list -->
+                                                                <div class="chat-list">
+                                                                    <a href="#" class="d-flex align-items-center">
+                                                                        <div class="flex-shrink-0">
+                                                                            <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
+                                                                            <span class="active"></span>
+                                                                        </div>
+                                                                        <div class="flex-grow-1 ms-3">
+                                                                            <h3>Mehedi Hasan</h3>
+                                                                            <p>front end developer</p>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="#" class="d-flex align-items-center">
+                                                                        <div class="flex-shrink-0">
+                                                                            <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
+                                                                        </div>
+                                                                        <div class="flex-grow-1 ms-3">
+                                                                            <h3>Ryhan</h3>
+                                                                            <p>front end developer</p>
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                                                                <!-- chat-list -->
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <!-- chat-list -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- chatlist -->
+                                    <!-- chatbox -->
+                                    <div class="chatbox">
+                                        <div class="modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="msg-head">
+                                                    <div class="row">
+                                                        <div class="col-8">
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="chat-icon"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/arroleftt.svg" alt="image title"></span>
+                                                                <div class="flex-shrink-0">
+                                                                    <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
+                                                                </div>
+                                                                <div class="flex-grow-1 ms-3">
+                                                                    <h3>Mehedi Hasan</h3>
+                                                                    <p>front end developer</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="msg-body">
+                                                        <ul>
+                                                            <li class="sender">
+                                                                <p> Hey, Are you there? </p>
+                                                                <span class="time">10:06 am</span>
+                                                            </li>
+                                                            <li class="sender">
+                                                                <p> Hey, Are you there? </p>
+                                                                <span class="time">10:16 am</span>
+                                                            </li>
+                                                            <li class="repaly">
+                                                                <p>yes!</p>
+                                                                <span class="time">10:20 am</span>
+                                                            </li>
+                                                            <li class="sender">
+                                                                <p> Hey, Are you there? </p>
+                                                                <span class="time">10:26 am</span>
+                                                            </li>
+                                                            <li class="sender">
+                                                                <p> Hey, Are you there? </p>
+                                                                <span class="time">10:32 am</span>
+                                                            </li>
+                                                            <li class="repaly">
+                                                                <p>How are you?</p>
+                                                                <span class="time">10:35 am</span>
+                                                            </li>
+                                                            <li>
+                                                                <div class="divider">
+                                                                    <h6>Today</h6>
+                                                                </div>
+                                                            </li>
+                                                            <li class="repaly">
+                                                                <p> yes, tell me</p>
+                                                                <span class="time">10:36 am</span>
+                                                            </li>
+                                                            <li class="repaly">
+                                                                <p>yes... on it</p>
+                                                                <span class="time">junt now</span>
+                                                            </li>
+
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="send-box">
+                                                    <form action="">
+                                                        <input type="text" class="form-control" aria-label="message…" placeholder="Write message…">
+
+                                                        <button type="button"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                  
+                </section>
+                {% endblock %}
+                
+
+                <div class="footer bg-white py-4 d-flex flex-lg-column" id="kt_footer">
+                    <!--begin::Container-->
+                    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+                        <!--begin::Copyright-->
+                        <div class="text-dark order-2 order-md-1">
+                            <span class="text-muted font-weight-bold mr-2">2021©</span>
+                            <span class="text-dark-75 text-hover-primary">Seydi Inc</span>
+                        </div>
+                        <!--end::Copyright-->
+                        <!--begin::Nav-->
+                        <div class="nav nav-dark order-1 order-md-2">
+                            <span class="nav-link pr-3 pl-0">About</span>
+                            <span class="nav-link px-3">Team</span>
+                            <span class="nav-link pl-3 pr-0">Contact</span>
+                        </div>
+                        <!--end::Nav-->
+                    </div>
+                    <!--end::Container-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- begin::User Panel-->
+ <div id="kt_quick_user" class="offcanvas offcanvas-right p-10">
+    <!--begin::Header-->
+    <div class="offcanvas-header d-flex align-items-center justify-content-between pb-5">
+        <h3 class="font-weight-bold m-0">User Profile
+            <small class="text-muted font-size-sm ml-2"></small></h3>
+        <a href="#" class="btn btn-xs btn-icon btn-light btn-hover-primary" id="kt_quick_user_close">
+            <i class="ki ki-close icon-xs text-muted"></i>
+        </a>
+    </div>
+    <!--end::Header-->
+    <!--begin::Content-->
+    <div class="offcanvas-content pr-5 mr-n5">
+        <!--begin::Header-->
+        <div class="d-flex align-items-center mt-5">
+            <div class="symbol symbol-100 mr-5">
+                <div class="symbol-label"
+                     style="background-image:url({% static user.profile.profile_photo %})"></div>
+                <i class="symbol-badge bg-success"></i>
+            </div>
+            <div class="d-flex flex-column">
+                <a href="#"
+                   class="font-weight-bold font-size-h5 text-dark-75 text-hover-primary">{{ user.username }}</a>
+                <div class="navi mt-2">
+                    <a href="#" class="navi-item">
+                            <span class="navi-link p-0 pb-2">
+                                <span class="navi-icon mr-1">
+                                    <span class="svg-icon svg-icon-lg svg-icon-primary">
+                                        <!--begin::Svg Icon | path:/media/svg/icons/Communication/Mail-notification.svg-->
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+                                             viewBox="0 0 24 24" version="1.1">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="0" y="0" width="24" height="24"/>
+                                                <path d="M21,12.0829584 C20.6747915,12.0283988 20.3407122,12 20,12 C16.6862915,12 14,14.6862915 14,18 C14,18.3407122 14.0283988,18.6747915 14.0829584,19 L5,19 C3.8954305,19 3,18.1045695 3,17 L3,8 C3,6.8954305 3.8954305,6 5,6 L19,6 C20.1045695,6 21,6.8954305 21,8 L21,12.0829584 Z M18.1444251,7.83964668 L12,11.1481833 L5.85557487,7.83964668 C5.4908718,7.6432681 5.03602525,7.77972206 4.83964668,8.14442513 C4.6432681,8.5091282 4.77972206,8.96397475 5.14442513,9.16035332 L11.6444251,12.6603533 C11.8664074,12.7798822 12.1335926,12.7798822 12.3555749,12.6603533 L18.8555749,9.16035332 C19.2202779,8.96397475 19.3567319,8.5091282 19.1603533,8.14442513 C18.9639747,7.77972206 18.5091282,7.6432681 18.1444251,7.83964668 Z"
+                                                      fill="#000000"/>
+                                                <circle fill="#000000" opacity="0.3" cx="19.5" cy="17.5" r="2.5"/>
+                                            </g>
+                                        </svg>
+                                        <!--end::Svg Icon-->
+                                    </span>
+                                </span>
+                                <span class="navi-text text-muted text-hover-primary">{{ user.email }}</span>
+                            </span>
+                    </a>
+                    <a href="/signOut" class="btn btn-sm btn-light-primary font-weight-bolder py-2 px-5">Sign
+                        Out</a>
+                </div>
+            </div>
+        </div>
+        <!--end::Header-->
+        <!--begin::Nav-->
+        <div class="navi navi-spacer-x-0 p-0">
+            <!--begin::Item-->
+            <a href="#" class="navi-item">
+                <div class="navi-link">
+                    <div class="symbol symbol-40 bg-light mr-3">
+                        <div class="symbol-label">
+                                <span class="svg-icon svg-icon-md svg-icon-success">
+                                    <!--begin::Svg Icon | path:/media/svg/icons/General/Notification2.svg-->
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+                                         viewBox="0 0 24 24" version="1.1">
+                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                            <rect x="0" y="0" width="24" height="24"/>
+                                            <path d="M13.2070325,4 C13.0721672,4.47683179 13,4.97998812 13,5.5 C13,8.53756612 15.4624339,11 18.5,11 C19.0200119,11 19.5231682,10.9278328 20,10.7929675 L20,17 C20,18.6568542 18.6568542,20 17,20 L7,20 C5.34314575,20 4,18.6568542 4,17 L4,7 C4,5.34314575 5.34314575,4 7,4 L13.2070325,4 Z"
+                                                  fill="#000000"/>
+                                            <circle fill="#000000" opacity="0.3" cx="18.5" cy="5.5" r="2.5"/>
+                                        </g>
+                                    </svg>
+                                    <!--end::Svg Icon-->
+                                </span>
+                        </div>
+                    </div>
+                    <div class="navi-text">
+                        <div class="font-weight-bold">My Profile</div>
+                        <div class="text-muted">Account settings and more</div>
+                    </div>
+                </div>
+            </a>
+            <!--end:Item-->
+            <!--begin::Item-->
+            <a href="{% url "chat" %}" class="navi-item">
+                <div class="navi-link">
+                    <div class="symbol symbol-40 bg-light mr-3">
+                        <div class="symbol-label">
+                                <span class="svg-icon svg-icon-md svg-icon-primary">
+                                    <!--begin::Svg Icon | path:/media/svg/icons/Communication/Mail-opened.svg-->
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+                                         viewBox="0 0 24 24" version="1.1">
+                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                            <rect x="0" y="0" width="24" height="24"/>
+                                            <path d="M6,2 L18,2 C18.5522847,2 19,2.44771525 19,3 L19,12 C19,12.5522847 18.5522847,13 18,13 L6,13 C5.44771525,13 5,12.5522847 5,12 L5,3 C5,2.44771525 5.44771525,2 6,2 Z M7.5,5 C7.22385763,5 7,5.22385763 7,5.5 C7,5.77614237 7.22385763,6 7.5,6 L13.5,6 C13.7761424,6 14,5.77614237 14,5.5 C14,5.22385763 13.7761424,5 13.5,5 L7.5,5 Z M7.5,7 C7.22385763,7 7,7.22385763 7,7.5 C7,7.77614237 7.22385763,8 7.5,8 L10.5,8 C10.7761424,8 11,7.77614237 11,7.5 C11,7.22385763 10.7761424,7 10.5,7 L7.5,7 Z"
+                                                  fill="#000000" opacity="0.3"/>
+                                            <path d="M3.79274528,6.57253826 L12,12.5 L20.2072547,6.57253826 C20.4311176,6.4108595 20.7436609,6.46126971 20.9053396,6.68513259 C20.9668779,6.77033951 21,6.87277228 21,6.97787787 L21,17 C21,18.1045695 20.1045695,19 19,19 L5,19 C3.8954305,19 3,18.1045695 3,17 L3,6.97787787 C3,6.70173549 3.22385763,6.47787787 3.5,6.47787787 C3.60510559,6.47787787 3.70753836,6.51099993 3.79274528,6.57253826 Z"
+                                                  fill="#000000"/>
+                                        </g>
+                                    </svg>
+                                    <!--end::Svg Icon-->
+                                </span>
+                        </div>
+                    </div>
+                    <div class="navi-text">
+                        <div class="font-weight-bold">Chat</div>
+                        {% comment %} <div class="text-muted">latest tasks</div> {% endcomment %}
+                    </div>
+                </div>
+            </a>
+            <!--end:Item-->
+        </div>
+        <!--end::Nav-->
+        <!--begin::Separator-->
+        <div class="separator separator-dashed my-7"></div>
+        <!--end::Separator-->
+        <!--begin::Notifications-->
+        <div>
+            <!--begin:Heading-->
+            <h5 class="mb-5">Recent Notifications</h5>
+            <!--end:Heading-->
+            <!--begin::Item-->
+            <div class="d-flex align-items-center bg-light-warning rounded p-5 gutter-b">
+                    <span class="svg-icon svg-icon-warning mr-5">
+                        <span class="svg-icon svg-icon-lg">
+                            <!--begin::Svg Icon | path:/media/svg/icons/Home/Library.svg-->
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                 width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <rect x="0" y="0" width="24" height="24"/>
+                                    <path d="M5,3 L6,3 C6.55228475,3 7,3.44771525 7,4 L7,20 C7,20.5522847 6.55228475,21 6,21 L5,21 C4.44771525,21 4,20.5522847 4,20 L4,4 C4,3.44771525 4.44771525,3 5,3 Z M10,3 L11,3 C11.5522847,3 12,3.44771525 12,4 L12,20 C12,20.5522847 11.5522847,21 11,21 L10,21 C9.44771525,21 9,20.5522847 9,20 L9,4 C9,3.44771525 9.44771525,3 10,3 Z"
+                                          fill="#000000"/>
+                                    <rect fill="#000000" opacity="0.3"
+                                          transform="translate(17.825568, 11.945519) rotate(-19.000000) translate(-17.825568, -11.945519)"
+                                          x="16.3255682" y="2.94551858" width="3" height="18" rx="1"/>
+                                </g>
+                            </svg>
+                            <!--end::Svg Icon-->
+                        </span>
+                    </span>
+                <div class="d-flex flex-column flex-grow-1 mr-2">
+                    <a href="#" class="font-weight-normal text-dark-75 text-hover-primary font-size-lg mb-1">Another
+                        purpose persuade</a>
+                    <span class="text-muted font-size-sm">Due in 2 Days</span>
+                </div>
+                <span class="font-weight-bolder text-warning py-1 font-size-lg">+28%</span>
+            </div>
+            <!--end::Item-->
+        </div>
+        <!--end::Notifications-->
+    </div>
+    <!--end::Content-->
+</div>
+<!-- end::User Panel-->
+
+{% endblock %}
+
+{% block js %}
+ <script>
+        // JavaScript for WebSocket communication
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatListItems = document.querySelectorAll('.chat-list a');
+            const chatBox = document.querySelector('.chatbox');
+            const chatUsername = document.getElementById('chat-username');
+            const chatAvatar = document.getElementById('chat-avatar');
+            const messageList = document.getElementById('message-list');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+
+            let currentUser = '';
+            let chatSocket = null;
+
+            function initializeWebSocket(roomName) {
+                chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+
+                chatSocket.onmessage = function(e) {
+                    const data = JSON.parse(e.data);
+                    const messageItem = document.createElement('li');
+                    messageItem.className = data.sender === currentUser ? 'sender' : 'reply';
+                    messageItem.innerHTML = `<p>${data.message}</p><span class="time">${data.timestamp}</span>`;
+                    messageList.appendChild(messageItem);
+                    messageList.scrollTop = messageList.scrollHeight;
+                };
+
+                chatSocket.onclose = function(e) {
+                    console.error('Chat socket closed unexpectedly');
+                };
+            }
+
+            chatListItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const user = this.getAttribute('data-user');
+                    currentUser = user;
+                    chatUsername.textContent = this.querySelector('h3').textContent;
+                    chatAvatar.src = this.querySelector('img').src;
+
+                    const roomName = `${currentUser}`;
+                    initializeWebSocket(roomName);
+                    chatBox.style.display = 'block';
+                });
+            });
+
+            sendButton.addEventListener('click', function() {
+                const message = messageInput.value;
+                if (message && chatSocket) {
+                    chatSocket.send(JSON.stringify({
+                        'message': message,
+                        'sender': currentUser,
+                        'receiver': chatUsername.textContent
+                    }));
+                    messageInput.value = '';
+                }
+            });
+
+            messageInput.addEventListener('keyup', function(e) {
+                if (e.keyCode === 13) {  // Enter key
+                    sendButton.click();
+                }
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+
