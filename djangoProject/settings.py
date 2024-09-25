@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'users',
     'chatbox',
     'channels',
-    'smartshare',
 ]
 
 ASGI_APPLICATION = 'djangoProject.asgi.application'
