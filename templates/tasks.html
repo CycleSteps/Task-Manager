@@ -60,6 +60,46 @@
     font-size: 0.75rem; /* Smaller font size for badges */
     padding: 0.25rem 0.5rem; /* Smaller padding for badges */
 }
+.document-vault-section {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+.file-list .file-item {
+    background-color: #e9ecef;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.file-list .file-item span {
+    font-size: 1rem;
+    color: #495057;
+}
+
+.file-list .file-item .btn {
+    font-size: 0.875rem;
+}
+
+.file-upload {
+    margin-top: 1rem;
+}
+
+.file-upload input {
+    width: 100%;
+}
+
+.file-upload .btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
 </style>
 
     <!--begin::Content-->
@@ -269,6 +309,27 @@
                                 <textarea class="form-control mb-2" placeholder="Add a comment..." id="commentInput{{ t.id }}"></textarea>
                                 <button class="btn btn-primary" onclick="addComment({{ t.id }})">Submit</button>
                             </div>
+
+                            <div class="document-vault-section">
+                                <h6>Document Vault</h6>
+                                <div id="fileList{{ t.id }}" class="file-list mb-3">
+                                    {% for file in t.documents.all %}
+                                        <div class="file-item mb-2 d-flex justify-content-between align-items-center">
+                                            <span>{{ file.name }}</span>
+                                            <a href="{{ file.file.url }}" class="btn btn-sm btn-success" download>
+                                                <i class="fa fa-download" aria-hidden="true"></i> Download
+                                            </a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="file-upload mb-3">
+                                    <input type="file" id="fileInput{{ t.id }}" name="files" class="form-control-file" multiple>
+                                    <button class="btn btn-primary mt-2" onclick="uploadFiles({{ t.id }})">
+                                        <i class="fa fa-upload" aria-hidden="true"></i> Upload Documents
+                                    </button>
+                                </div>
+                            </div>                            
                         </div>
                     </div>
                 </div>
@@ -287,6 +348,52 @@
 
     <script>
 
+        function uploadFiles(taskId) {
+            const fileInput = document.getElementById(`fileInput${taskId}`);
+            const files = fileInput.files;
+        
+            if (files.length > 0) {
+                const formData = new FormData();
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('documents', files[i]);
+                }
+        
+                fetch(`/boards/document/${taskId}/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add the new files to the file list dynamically
+                        const fileList = document.getElementById(`fileList${taskId}`);
+                        data.files.forEach(file => {
+                            const fileItem = `
+                                <div class="file-item mb-2 d-flex justify-content-between align-items-center">
+                                    <span>${file.file_name}</span>
+                                    <a href="${file.file_url}" class="btn btn-sm btn-success" download>
+                                        <i class="fa fa-download" aria-hidden="true"></i> Download
+                                    </a>
+                                </div>
+                            `;
+                            fileList.innerHTML += fileItem;
+                        });
+                        fileInput.value = '';  // Clear the file input
+                    } else {
+                        alert('File upload failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                });
+            } else {
+                alert('Please select files to upload');
+            }
+        }
+        
         
 
                 
@@ -355,7 +462,6 @@
         }
         
         function updateTaskName(taskId) {
-            console.log('@@@@@@@@@@@@2',getCSRFToken())
             var titleInput = document.getElementById('taskName' + taskId);
             var descInput = document.getElementById('taskDescription' + taskId);
         

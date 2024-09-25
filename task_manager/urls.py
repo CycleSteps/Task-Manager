@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Projects, Tasks, ManegeTasks, MangeProject,UpdateSubtaskStatusView, AddCommentView,AddSubtaskView
+from .views import Projects, Tasks, ManegeTasks, MangeProject,UpdateSubtaskStatusView, AddCommentView,AddSubtaskView,TaskFiles
 from . import views
 
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
     path('add-subtask/', AddSubtaskView.as_view(), name='add_subtask'),
     path('update-subtask-status/', UpdateSubtaskStatusView.as_view(), name='update_subtask_status'),
     path('tasks/<int:task_id>/update/', views.update_task, name='update_task'),
+    path('document/<int:task_id>/', TaskFiles.as_view(), name='upload_document'),
 ]

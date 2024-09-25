@@ -1,5 +1,5 @@
 from django.contrib import admin
-from task_manager.models import Project, Task,Subtask, Comment
+from task_manager.models import Project, Task,Subtask, Comment,TaskDocument
 
 
 
@@ -11,7 +11,18 @@ class CommentInline(admin.TabularInline):
     model = Comment
     extra = 1  # Number of empty forms to display
 
+# Inline class for TaskDocument in the TaskAdmin
+class TaskDocumentInline(admin.TabularInline):
+    model = TaskDocument
+    extra = 1  # Allows adding extra documents in the admin interface
 
+
+# Admin class for TaskDocument
+@admin.register(TaskDocument)
+class TaskDocumentAdmin(admin.ModelAdmin):
+    list_display = ('task', 'name', 'file')
+    search_fields = ('name', 'file')
+    list_filter = ('task',)
 
 
 class ProjectAdmin(admin.ModelAdmin):

@@ -33,7 +33,13 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     progress = models.FloatField(default=0.0)  # Can be between 0.0 and 100.0
 
+class TaskDocument(models.Model):
+    task = models.ForeignKey(Task, related_name='documents', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='task_files/')
+    name = models.CharField(max_length=255, null=True, blank=True)
 
+    def __str__(self):
+        return self.name or self.file.name
 
 class Subtask(models.Model):
     task = models.ForeignKey(Task, related_name='subtasks', on_delete=models.CASCADE)

@@ -9,12 +9,14 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.http import require_POST
 from reports.models import ProjectInfo
-from .models import Task, Project,Subtask, Comment
+from .models import Task, Project,Subtask, Comment,TaskDocument
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.core.files.storage import FileSystemStorage
+
 
 
 
@@ -296,3 +298,30 @@ class AddSubtaskView(View):
 
         except Task.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Task not found'}, status=404)
+        
+class TaskFiles(View):
+    def post(self, request, task_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+        task = get_object_or_404(Task, id=task_id)
+        
+        if request.FILES.getlist('documents'):
+            file_list = request.FILES.getlist('documents')
+            saved_files = []
+            for file in file_list:
+                fs = FileSystemStorage()
+                file_name = fs.save(file.name, file)
+                file_url = fs.url(file_name)
+                
+                # Save file details in TaskDocument model
+                task_document = TaskDocument.objects.create(task=task, file=file_name, name=file.name)
+                
+                saved_files.append({
+                    'file_name': file_name,
+                    'file_url': file_url
+                })
+
+            return JsonResponse({'success': True, 'files': saved_files})
+
+        return JsonResponse({'success': False, 'message': 'No files uploaded'}, status=400)
