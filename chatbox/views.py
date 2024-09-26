@@ -3,11 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Chat
 from django.http import JsonResponse
+from encryption.encrypt_test import encrypt_message,decrypt_message
+
+
 
 @login_required
 def chat_view(request):
     users = User.objects.exclude(username=request.user.username)
     return render(request, 'chatbox.html', {'users': users, 'current_user': request.user})
+
 
 @login_required
 def load_chat_history(request, target_username):
@@ -26,9 +30,10 @@ def load_chat_history(request, target_username):
 
     chat_data = []
     for msg in messages:
+        decrypted_message = decrypt_message(msg.message)  # Decrypt the message
         chat_data.append({
             'sender': msg.sender.username,
-            'message': msg.message,
+            'message': decrypted_message,
             'timestamp': msg.timestamp.strftime('%I:%M %p'),
         })
 

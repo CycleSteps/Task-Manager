@@ -252,12 +252,12 @@
                         <div class="modal-header">
                             <h5 id="taskTitleDisplay{{ t.id }}" class="task-title" onclick="makeTitleEditable({{ t.id }})">{{ t.name }}</h5>
                             <input name="name" type="text" class="form-control d-none" id="taskName{{ t.id }}" value="{{ t.name }}" onblur="saveTaskTitle({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'title')" />
-                            <div class="ml-auto">
+                            {% comment %} <div class="ml-auto">
                                 <i class="fas fa-edit" aria-hidden="true" style="cursor: pointer; font-size: 20px; color: #007bff;" onclick="updateTaskName({{ t.id }})"></i>
-                            </div>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            </div> {% endcomment %}
+                            {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <i aria-hidden="true" class="ki ki-close"></i>
-                            </button>
+                            </button> {% endcomment %}
                         </div>
                         <div class="modal-body">
                             <div class="d-flex flex-column mb-4">
@@ -314,14 +314,14 @@
                                 <h6>Document Vault</h6>
                                 <div id="fileList{{ t.id }}" class="file-list mb-3">
                                     {% for file in t.documents.all %}
-                                        <div class="file-item mb-2 d-flex justify-content-between align-items-center">
-                                            <span>{{ file.name }}</span>
-                                            <a href="{{ file.file.url }}" class="btn btn-sm btn-success" download>
-                                                <i class="fa fa-download" aria-hidden="true"></i> Download
-                                            </a>
-                                        </div>
+                                    <div class="file-item mb-2 d-flex justify-content-between align-items-center">
+                                        <span>{{ file.name }}</span>
+                                        <a href="#" onclick="downloadFile({{ t.id }}, {{ file.id }}, '{{ file.name }}')" class="btn btn-sm btn-success">
+                                            <i class="fa fa-download" aria-hidden="true"></i> Download
+                                        </a>
+                                    </div>
                                     {% endfor %}
-                                </div>
+                                </div>                                                              
                                 
                                 <div class="file-upload mb-3">
                                     <input type="file" id="fileInput{{ t.id }}" name="files" class="form-control-file" multiple>
@@ -329,6 +329,7 @@
                                         <i class="fa fa-upload" aria-hidden="true"></i> Upload Documents
                                     </button>
                                 </div>
+                                
                             </div>                            
                         </div>
                     </div>
@@ -348,51 +349,88 @@
 
     <script>
 
+        function downloadFile(taskId, fileId, fileName) {
+            fetch(`/boards/document/${taskId}/${fileId}/download/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included for security
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('File download failed');
+                }
+                return response.blob();  // Get the file as a Blob
+            })
+            .then(blob => {
+                // Create a link to download the file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;  // Set the filename based on the original file name
+                document.body.appendChild(a);
+                a.click();  // Trigger the download
+                a.remove();  // Remove the link after download
+                window.URL.revokeObjectURL(url); // Clean up the URL object
+            })
+            .catch(error => {
+                console.error('Download error:', error);
+                alert('Download failed');
+            });
+        }
+        
+
         function uploadFiles(taskId) {
             const fileInput = document.getElementById(`fileInput${taskId}`);
             const files = fileInput.files;
         
+            // 200 MB limit in bytes
+            const MAX_UPLOAD_SIZE = 200 * 1024 * 1024;
+        
             if (files.length > 0) {
                 const formData = new FormData();
+                let validFiles = true;
+        
                 for (let i = 0; i < files.length; i++) {
+                    // Check file size
+                    if (files[i].size > MAX_UPLOAD_SIZE) {
+                        alert(`File ${files[i].name} exceeds the 200 MB limit.`);
+                        validFiles = false;
+                        break;
+                    }
                     formData.append('documents', files[i]);
                 }
         
-                fetch(`/boards/document/${taskId}/`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Add the new files to the file list dynamically
-                        const fileList = document.getElementById(`fileList${taskId}`);
-                        data.files.forEach(file => {
-                            const fileItem = `
-                                <div class="file-item mb-2 d-flex justify-content-between align-items-center">
-                                    <span>${file.file_name}</span>
-                                    <a href="${file.file_url}" class="btn btn-sm btn-success" download>
-                                        <i class="fa fa-download" aria-hidden="true"></i> Download
-                                    </a>
-                                </div>
-                            `;
-                            fileList.innerHTML += fileItem;
-                        });
-                        fileInput.value = '';  // Clear the file input
-                    } else {
-                        alert('File upload failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Upload error:', error);
-                });
+                if (validFiles) {
+                    fetch(`/boards/document/${taskId}/`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Optionally display success message
+                            alert('Files uploaded successfully!');
+                            
+                            // Refresh the page
+                            location.reload();
+                        } else {
+                            alert('File upload failed: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                    });
+                }
             } else {
                 alert('Please select files to upload');
             }
         }
+        
+        
         
         
 

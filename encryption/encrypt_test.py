@@ -1,22 +1,23 @@
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad, unpad
+from cryptography.fernet import Fernet
+from django.conf import settings
 
-def encrypt_aes_256(data, key):
-    """Encrypts data using AES-256."""
-    if len(key) != 32:
-        raise ValueError("Key must be 256 bits (32 bytes) long.")
+key = settings.ENCRYPTION_KEY.encode()
+cipher_suite = Fernet(key)
 
-    iv = get_random_bytes(AES.block_size)
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    return iv + cipher.encrypt(pad(data, AES.block_size))
 
-def decrypt_aes_256(data, key):
-    """Decrypts data using AES-256."""
-    if len(key) != 32:
-        raise ValueError("Key must be 256 bits (32 bytes) long.")
+def encrypt_message(message):
+    """Encrypt a message."""
+    return cipher_suite.encrypt(message.encode()).decode()
 
-    iv = data[:AES.block_size]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    return unpad(cipher.decrypt(data[AES.block_size:]), AES.block_size)
+def decrypt_message(message):
+    """Decrypt a message."""
+    return cipher_suite.decrypt(message.encode()).decode()
 
+
+def encrypt_data(message):
+    """Encrypt a message."""
+    return cipher_suite.encrypt(message)
+
+def decrypt_data(message):
+    """Decrypt a message."""
+    return cipher_suite.decrypt(message)

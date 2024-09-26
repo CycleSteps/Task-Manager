@@ -62,6 +62,8 @@ CHANNEL_LAYERS = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+ENCRYPTION_KEY = config('ENCRYPTION_KEY')
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
