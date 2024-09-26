@@ -7,4 +7,13 @@
 - **Encryption**.
     - Code for AES 256 bit encryption alrady part of project
     - All files saved for sharing and conversations should have the capability of being encrypted.
-- **Report Functionality for Users**. Reactivate the feature from the base project
+- **Report Functionality for Users**. 
+    - Reactivate the feature from the base project
+    - Individual user report for the admin
+    - overall overview of the user in the form of report 
+
+
+# code level
+    - code encryption
+    - bright ui
+    
