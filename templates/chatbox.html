@@ -758,7 +758,7 @@
                                                                     {% for user in users %}
                                                                         <a href="#" class="d-flex align-items-center" onclick="startChatting('{{ user.username }}')">
                                                                             <div class="flex-shrink-0">
-                                                                                <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/user.png" alt="user img">
+                                                                                <img class="img-fluid" src="" alt="">
                                                                                 {% comment %} <span class="active"></span> {% endcomment %}
                                                                             </div>
                                                                             <h3>{{ user.username }}</h3>
@@ -895,7 +895,7 @@
         <!--begin::Nav-->
         <div class="navi navi-spacer-x-0 p-0">
             <!--begin::Item-->
-            <a href="#" class="navi-item">
+            {% comment %} <a href="#" class="navi-item">
                 <div class="navi-link">
                     <div class="symbol symbol-40 bg-light mr-3">
                         <div class="symbol-label">
@@ -920,7 +920,7 @@
                         <div class="text-muted">Account settings and more</div>
                     </div>
                 </div>
-            </a>
+            </a> {% endcomment %}
             <!--end:Item-->
             <!--begin::Item-->
             <a href="{% url "chat" %}" class="navi-item">
