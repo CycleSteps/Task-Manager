@@ -3,6 +3,10 @@ import json
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 from .models import Chat
+from encryption.encrypt_test import encrypt_message,decrypt_message
+
+
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -33,9 +37,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         receiver = await sync_to_async(User.objects.get)(username=receiver_username)
 
+        # Encrypt the message
+        encrypted_message = encrypt_message(message)
+
         # Save the message to the database
         chat_message = await sync_to_async(Chat.objects.create)(
-            sender=self.scope['user'], receiver=receiver, message=message
+            sender=self.scope['user'], receiver=receiver, message=encrypted_message
         )
 
         # Send message to room group
@@ -43,20 +50,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': chat_message.message,
+                'message': chat_message.message,  # This is encrypted
                 'sender': chat_message.sender.username,
                 'timestamp': chat_message.timestamp.strftime('%I:%M %p')
             }
         )
 
     async def chat_message(self, event):
-        message = event['message']
+        encrypted_message = event['message']
         sender = event['sender']
         timestamp = event['timestamp']
 
+        # Decrypt the message before sending it to WebSocket
+        decrypted_message = decrypt_message(encrypted_message)
+
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': message,
+            'message': decrypted_message,
             'sender': sender,
             'timestamp': timestamp
         }))

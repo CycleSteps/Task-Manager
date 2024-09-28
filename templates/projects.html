@@ -90,8 +90,8 @@
                                 <!--begin::Toolbar-->
                                 <div class="d-flex align-items-center">
                                     <!--begin::Button-->
-                                    <a href="{% url "dashboard" %}"
-                                       class="btn btn-transparent-white font-weight-bold py-3 px-6 mr-2">Dashboard</a>
+                                    <a href="{% url 'dashboard' %}" class="btn btn-transparent-white font-weight-bold py-3 px-6 mr-2">Dashboard</a>
+                                    <a href="/report" class="btn btn-transparent-white font-weight-bold py-3 px-6 mr-2">Report</a>
                                     <!--end::Button-->
                                     <!--begin::Dropdown-->
                                     <div class="dropdown dropdown-inline ml-2" data-toggle="tooltip"
@@ -249,12 +249,6 @@
                                             <div class="d-flex mb-5 align-items-cente">
                                                 <span class="d-block font-weight-bold mr-5">Progress</span>
                                                 <div class="d-flex flex-row-fluid align-items-center">
-                                                    <div class="progress progress-xs mt-2 mb-2 w-100">
-                                                        <div class="progress-bar bg-success" role="progressbar"
-                                                             style="width: {{ proj.progress }}%;" aria-valuenow="50"
-                                                             aria-valuemin="0"
-                                                             aria-valuemax="100"></div>
-                                                    </div>
                                                     <span class="ml-3 font-weight-bolder">{{ proj.progress }}%</span>
                                                 </div>
                                             </div>
@@ -361,7 +355,7 @@
                         <!--begin::Copyright-->
                         <div class="text-dark order-2 order-md-1">
                             <span class="text-muted font-weight-bold mr-2">2024©</span>
-                            <span class="text-dark-75 text-hover-primary">BISAG</span>
+                            <span class="text-dark-75 text-hover-primary"></span>
                         </div>
                         <!--end::Copyright-->
                         <!--begin::Nav-->
@@ -438,7 +432,7 @@
             <!--begin::Nav-->
             <div class="navi navi-spacer-x-0 p-0">
                 <!--begin::Item-->
-                <a href="#" class="navi-item">
+                {% comment %} <a href="#" class="navi-item">
                     <div class="navi-link">
                         <div class="symbol symbol-40 bg-light mr-3">
                             <div class="symbol-label">
@@ -463,7 +457,7 @@
                             <div class="text-muted">Account settings and more</div>
                         </div>
                     </div>
-                </a>
+                </a> {% endcomment %}
                 <!--end:Item-->
                 <!--begin::Item-->
                 <a href="{% url "chat" %}" class="navi-item">

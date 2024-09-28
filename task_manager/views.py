@@ -1,5 +1,6 @@
 import datetime
 import json
+import base64
 import random
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
@@ -9,14 +10,24 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.http import require_POST
 from reports.models import ProjectInfo
-from .models import Task, Project,Subtask, Comment
+from .models import Task, Project,Subtask, Comment,TaskDocument
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.core.files.storage import FileSystemStorage
+from django.core.files.base import ContentFile
+from django.http import FileResponse
+from encryption.encrypt_test import encrypt_data,decrypt_data
+from django.core.exceptions import ValidationError
 
 
+# You need to generate a key and store it securely.
+# For this example, we'll generate one on the fly.
+# In practice, generate it once and store securely.
+
+# cipher = Fernet(settings.ENCRYPTION_KEY)
 
 class Projects(View):
     def get(self, request):
@@ -296,3 +307,73 @@ class AddSubtaskView(View):
 
         except Task.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Task not found'}, status=404)
+        
+class TaskFiles(View):
+    MAX_UPLOAD_SIZE = 200 * 1024 * 1024  # 200 MB in bytes
+
+    def post(self, request, task_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+        task = get_object_or_404(Task, id=task_id)
+
+        # Calculate the total size of existing documents for the task
+        existing_documents = task.documents.all()
+        total_size = sum(doc.file.size for doc in existing_documents)
+
+        if request.FILES.getlist('documents'):
+            file_list = request.FILES.getlist('documents')
+            saved_files = []
+            for file in file_list:
+                # Check file size
+                if file.size > self.MAX_UPLOAD_SIZE:
+                    return JsonResponse({'success': False, 'message': f'File {file.name} exceeds the 200 MB limit.'}, status=400)
+
+                # Check if the total size exceeds the limit when adding this file
+                if total_size + file.size > self.MAX_UPLOAD_SIZE:
+                    return JsonResponse({'success': False, 'message': f'Adding {file.name} exceeds the 200 MB limit for this task.'}, status=400)
+
+                file_data = file.read()  # Read the file content
+                encrypted_data = encrypt_data(file_data)  # Encrypt the file content
+
+                # Save the encrypted data in a file
+                file_name = f'encrypted_{file.name}'
+                fs = FileSystemStorage()
+                file_path = fs.save(file_name, ContentFile(encrypted_data))
+                file_url = fs.url(file_path)
+
+                # Save file details in TaskDocument model
+                task_document = TaskDocument.objects.create(task=task, file=file_path, name=file.name)
+                
+                saved_files.append({
+                    'file_name': file_name,
+                    'file_url': file_url
+                })
+
+                # Update the total size after adding the new file
+                total_size += file.size
+
+            return JsonResponse({'success': True, 'files': saved_files})
+
+        return JsonResponse({'success': False, 'message': 'No files uploaded'}, status=400)
+
+    
+
+
+# class DownloadFileView(View):
+def DownloadFileView(request, task_id, file_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    task_document = get_object_or_404(TaskDocument, id=file_id, task_id=task_id)
+    file_path = task_document.file.path
+    with open(file_path, 'rb') as encrypted_file:
+        encrypted_data = encrypted_file.read()
+
+    # Decrypt the file content
+    decrypted_data = decrypt_data(encrypted_data)
+
+    # Serve the decrypted file for download
+    decrypted_file = ContentFile(decrypted_data, name=task_document.name)
+    response = FileResponse(decrypted_file, as_attachment=True, filename=task_document.name)
+    return response

@@ -140,6 +140,7 @@
                             <div class="d-flex align-items-center">
                                 <a href="/boards" class="btn btn-transparent-white font-weight-bold py-3 px-6">Go To Task</a>
                             </div>
+                            
                         </div>
                     </div>
 
@@ -165,7 +166,7 @@
                                     </div>
                                     <div class="c-dashboardInfo col-lg-3 col-md-6">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Projects Assigned
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Projects Assigned to
                                                 <path fill="none" d="M0 0h24v24H0z"></path>
                                             </h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ projects_assigned_count }}</span>
@@ -173,7 +174,7 @@
                                     </div>
                                     <div class="c-dashboardInfo col-lg-3 col-md-6">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Tasks Assigned
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Tasks Assigned to
                                                 <path fill="none" d="M0 0h24v24H0z"></path>
                                             </h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ tasks_assigned_count }}</span>
@@ -192,7 +193,7 @@
                     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
                         <div class="text-dark">
                             <span class="text-muted font-weight-bold mr-2">2024©</span>
-                            <span class="text-dark-75 text-hover-primary">BISAG</span>
+                            <span class="text-dark-75 text-hover-primary"></span>
                         </div>
                         <div class="nav nav-dark">
                             <span class="nav-link pr-3 pl-0">About</span>
@@ -249,8 +250,7 @@
                                 <span class="navi-text text-muted text-hover-primary">{{ user.email }}</span>
                             </span>
                     </a>
-                    <a href="/signOut" class="btn btn-sm btn-light-primary font-weight-bolder py-2 px-5">Sign
-                        Out</a>
+                    <a href="/signOut" class="btn btn-sm btn-light-primary font-weight-bolder py-2 px-5">Sign Out</a>
                 </div>
             </div>
         </div>
@@ -261,7 +261,7 @@
         <!--begin::Nav-->
         <div class="navi navi-spacer-x-0 p-0">
             <!--begin::Item-->
-            <a href="#" class="navi-item">
+            {% comment %} <a href="#" class="navi-item">
                 <div class="navi-link">
                     <div class="symbol symbol-40 bg-light mr-3">
                         <div class="symbol-label">
@@ -286,7 +286,7 @@
                         <div class="text-muted">Account settings and more</div>
                     </div>
                 </div>
-            </a>
+            </a> {% endcomment %}
             <!--end:Item-->
             <!--begin::Item-->
             <a href="{% url "chat" %}" class="navi-item">

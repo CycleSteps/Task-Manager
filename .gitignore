@@ -1,8 +1,10 @@
 # Ignore the virtual environment folder
 venv/
 
+media/
+
 # Ignore environment variable file
-.env
+# .env
 
 # # Ignore Python cache files
 # __pycache__/
