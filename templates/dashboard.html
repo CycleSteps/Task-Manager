@@ -8,85 +8,131 @@
 
 
 <style>
-   
     .container_dashboard {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
-      }
-      .c-dashboardInfo {
-        margin-bottom: 15px;
-      }
-      .c-dashboardInfo .wrap {
+    }
+    
+    .c-dashboardInfo {
+        margin-bottom: 30px;
+        position: relative;
+        flex: 1; /* Ensures cards take equal width */
+        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
+    }
+    
+    .c-dashboardInfo:hover {
+        transform: translateY(-5px); /* Lift the card on hover */
+        box-shadow: 4px 15px 25px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+    }
+    
+    .c-dashboardInfo .wrap {
         background: #ffffff;
-        box-shadow: 2px 10px 20px rgba(0, 0, 0, 0.1);
-        border-radius: 7px;
+        box-shadow: 2px 8px 15px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
         text-align: center;
         position: relative;
         overflow: hidden;
-        padding: 40px 25px 20px;
+        padding: 60px 45px 40px; /* Increased padding for larger cards */
         height: 100%;
-      }
-      .c-dashboardInfo__title,
-      .c-dashboardInfo__subInfo {
+        transition: background 0.3s ease; /* Smooth background transition */
+    }
+    
+    .c-dashboardInfo:hover .wrap {
+        background: rgba(255, 255, 255, 0.95); /* Slightly change background on hover */
+    }
+    
+    .c-dashboardInfo__title,
+    .c-dashboardInfo__subInfo {
         color: #6c6c6c;
-        font-size: 1.18em;
-      }
-      .c-dashboardInfo span {
+        font-size: 1.5em; /* Increased font size for title */
+    }
+    
+    .c-dashboardInfo span {
         display: block;
-      }
-      .c-dashboardInfo__count {
+    }
+    
+    .c-dashboardInfo__count {
         font-weight: 600;
-        font-size: 2.5em;
-        line-height: 64px;
+        font-size: 3.5em; /* Increased font size for numbers */
+        line-height: 80px;
         color: #323c43;
-      }
-      .c-dashboardInfo .wrap:after {
+    }
+    
+    .c-dashboardInfo .wrap:after {
         display: block;
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: 10px;
+        height: 12px;
         content: "";
-      }
-      
-      .c-dashboardInfo:nth-child(1) .wrap:after {
+    }
+    
+    .c-dashboardInfo:nth-child(1) .wrap:after {
         background: linear-gradient(82.59deg, #00c48c 0%, #00a173 100%);
-      }
-      .c-dashboardInfo:nth-child(2) .wrap:after {
+    }
+    
+    .c-dashboardInfo:nth-child(2) .wrap:after {
         background: linear-gradient(81.67deg, #0084f4 0%, #1a4da2 100%);
-      }
-      .c-dashboardInfo:nth-child(3) .wrap:after {
+    }
+    
+    .c-dashboardInfo:nth-child(3) .wrap:after {
         background: linear-gradient(69.83deg, #0084f4 0%, #00c48c 100%);
-      }
-      .c-dashboardInfo:nth-child(4) .wrap:after {
+    }
+    
+    .c-dashboardInfo:nth-child(4) .wrap:after {
         background: linear-gradient(81.67deg, #ff647c 0%, #1f5dc5 100%);
-      }
-      .c-dashboardInfo__title svg {
-        color: #d7d7d7;
-        margin-left: 5px;
-      }
-      .MuiSvgIcon-root-19 {
-        fill: currentColor;
-        width: 1em;
-        height: 1em;
-        display: inline-block;
-        font-size: 24px;
-        transition: fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-        user-select: none;
-        flex-shrink: 0;
-      }
-      .c-dashboardInfo__title {
-        font-size: 1.5rem; /* Increase the font size of the title */
-        color: black; /* Change the title color to black */
+    }
+    
+    .c-dashboardInfo__title {
+        font-size: 1.75rem; /* Larger font size for title */
+        color: black;
     }
     
     .c-dashboardInfo__count {
-        font-size: 2rem; /* Increase the font size of the numbers */
-        color: black; /* Change the number color to black */
+        font-size: 3.5rem; /* Larger font size for numbers */
+        color: black;
     }
     
-      
+    /* Simplified vertical line after the second card */
+    .row {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between; /* Space out the cards evenly */
+        align-items: stretch;
+    }
+    
+    .c-dashboardInfo:nth-child(2)::after {
+        content: '';
+        position: absolute;
+        right: -20px; /* Adjust spacing between the vertical line and the second card */
+        top: 0;
+        height: 100%;
+        width: 5px; /* Width of the vertical line */
+        background: #d0d0d0; /* Light gray color for the line */
+        border-radius: 5px; /* Rounded edges for a softer look */
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Shadow for the vertical line */
+    }
+    
+    /* Ensure equal spacing between all cards */
+    .c-dashboardInfo {
+        margin: 0 20px; /* Increased margin to separate cards more */
+    }
+    
+    .c-dashboardInfo:first-child {
+        margin-left: 0; /* No margin on the left for the first card */
+    }
+    
+    .c-dashboardInfo:last-child {
+        margin-right: 0; /* No margin on the right for the last card */
+    }
+    
+    /* Ensure vertical line is not affected by card hover */
+    .c-dashboardInfo:nth-child(2)::after:hover {
+        background: #d0d0d0; /* Keep the vertical line color unchanged */
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Shadow remains the same */
+    }
+                            
 </style>
 
     <!--begin::Header Mobile-->
@@ -148,44 +194,43 @@
                         <div id="root">
                             <div class="container_dashboard pt-5">
                                 <div class="row align-items-stretch">
-                                    <div class="c-dashboardInfo col-lg-3 col-md-6">
+                                    <!-- First card -->
+                                    <div class="c-dashboardInfo">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">My Projects
-                                                <path fill="none" d="M0 0h24v24H0z"></path>
-                                            </h4>
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">My Projects</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ my_projects_count }}</span>
                                         </div>
                                     </div>
-                                    <div class="c-dashboardInfo col-lg-3 col-md-6">
+                                    
+                                    <!-- Second card with vertical line after it -->
+                                    <div class="c-dashboardInfo">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">My Tasks
-                                                <path fill="none" d="M0 0h24v24H0z"></path>
-                                            </h4>
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">My Tasks</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ my_tasks_count }}</span>
                                         </div>
                                     </div>
-                                    <div class="c-dashboardInfo col-lg-3 col-md-6">
+                                    
+                                    <!-- Third card -->
+                                    <div class="c-dashboardInfo">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Projects Assigned to
-                                                <path fill="none" d="M0 0h24v24H0z"></path>
-                                            </h4>
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Projects Assigned to</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ projects_assigned_count }}</span>
                                         </div>
                                     </div>
-                                    <div class="c-dashboardInfo col-lg-3 col-md-6">
+                                    
+                                    <!-- Fourth card -->
+                                    <div class="c-dashboardInfo">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Tasks Assigned to
-                                                <path fill="none" d="M0 0h24v24H0z"></path>
-                                            </h4>
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Tasks Assigned to</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ tasks_assigned_count }}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    
+                    </div>                  
+
+
                 </div>
                 {% endblock %}
 
