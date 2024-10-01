@@ -3,10 +3,9 @@ import json
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 from .models import Chat
-from encryption.encrypt_test import encrypt_message,decrypt_message
-
-
-
+from encryption.encrypt_test import encrypt_message, decrypt_message
+import pytz  # For timezone handling
+from django.utils import timezone
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -32,7 +31,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data['message']
-        sender = data['sender']
         receiver_username = data['receiver']
 
         receiver = await sync_to_async(User.objects.get)(username=receiver_username)
@@ -52,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'chat_message',
                 'message': chat_message.message,  # This is encrypted
                 'sender': chat_message.sender.username,
-                'timestamp': chat_message.timestamp.strftime('%I:%M %p')
+                'timestamp': chat_message.timestamp  # Keep as UTC
             }
         )
 
@@ -64,9 +62,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Decrypt the message before sending it to WebSocket
         decrypted_message = decrypt_message(encrypted_message)
 
+        # Convert the timestamp to Indian timezone (Asia/Kolkata)
+        indian_timezone = pytz.timezone('Asia/Kolkata')
+        formatted_timestamp = timestamp.astimezone(indian_timezone).strftime('%I:%M %p')
+
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': decrypted_message,
             'sender': sender,
-            'timestamp': timestamp
+            'timestamp': formatted_timestamp  # Convert to IST for display
         }))

@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .models import Chat
 from django.http import JsonResponse
 from encryption.encrypt_test import encrypt_message,decrypt_message
+import pytz  # For timezone handling
 
 
 
@@ -11,7 +12,6 @@ from encryption.encrypt_test import encrypt_message,decrypt_message
 def chat_view(request):
     users = User.objects.exclude(username=request.user.username)
     return render(request, 'chatbox.html', {'users': users, 'current_user': request.user})
-
 
 @login_required
 def load_chat_history(request, target_username):
@@ -31,10 +31,16 @@ def load_chat_history(request, target_username):
     chat_data = []
     for msg in messages:
         decrypted_message = decrypt_message(msg.message)  # Decrypt the message
+        
+        # Convert timestamp to IST for display
+        indian_timezone = pytz.timezone('Asia/Kolkata')
+        formatted_timestamp = msg.timestamp.astimezone(indian_timezone).strftime('%I:%M %p')
+
         chat_data.append({
             'sender': msg.sender.username,
             'message': decrypted_message,
-            'timestamp': msg.timestamp.strftime('%I:%M %p'),
+            'timestamp': formatted_timestamp,  # Display in IST
         })
 
     return JsonResponse(chat_data, safe=False)
+

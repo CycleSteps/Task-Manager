@@ -377,3 +377,13 @@ def DownloadFileView(request, task_id, file_id):
     decrypted_file = ContentFile(decrypted_data, name=task_document.name)
     response = FileResponse(decrypted_file, as_attachment=True, filename=task_document.name)
     return response
+
+
+
+def delete_document(request, document_id):
+    if request.method == "DELETE":
+        document = get_object_or_404(TaskDocument, id=document_id)
+        document.file.delete()  # Deletes the file from storage
+        document.delete()       # Deletes the entry from the database
+        return JsonResponse({'success': True, 'message': 'Document deleted successfully!'})
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)

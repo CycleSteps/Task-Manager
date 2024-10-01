@@ -6,8 +6,7 @@
 {% block css %}
     <link href="{% static '/plugins/custom/kanban/kanban.bundle.css' %}" rel="stylesheet" type="text/css"/>
     <link href="{% static '/plugins/custom/fullcalendar/fullcalendar.bundle.css' %}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!--install the offline icon library-->
-
+    <link href="{% static '/css/font-awsome-css/all.min.css'%}" rel="stylesheet" type="text/css">
 
 {% endblock %}
 
@@ -316,21 +315,26 @@
                                     {% for file in t.documents.all %}
                                     <div class="file-item mb-2 d-flex justify-content-between align-items-center">
                                         <span>{{ file.name }}</span>
-                                        <a href="#" onclick="downloadFile({{ t.id }}, {{ file.id }}, '{{ file.name }}')" class="btn btn-sm btn-success">
-                                            <i class="fa fa-download" aria-hidden="true"></i> Download
-                                        </a>
+                                        <div>
+                                            <a href="#" onclick="downloadFile({{ t.id }}, {{ file.id }}, '{{ file.name }}')" class="btn btn-sm btn-primary">
+                                                <i class="fa fa-download" aria-hidden="true"></i> 
+                                            </a>
+                                            <a href="#" onclick="deleteFile({{ file.id }})" class="btn btn-sm btn-danger">
+                                                <i class="fa fa-trash" aria-hidden="true"></i> 
+                                            </a>
+                                        </div>
                                     </div>
                                     {% endfor %}
-                                </div>                                                              
-                                
+                                </div>
+                            
                                 <div class="file-upload mb-3">
                                     <input type="file" id="fileInput{{ t.id }}" name="files" class="form-control-file" multiple>
                                     <button class="btn btn-primary mt-2" onclick="uploadFiles({{ t.id }})">
                                         <i class="fa fa-upload" aria-hidden="true"></i> Upload Documents
                                     </button>
                                 </div>
-                                
-                            </div>                            
+                            </div>
+                                                       
                         </div>
                     </div>
                 </div>
@@ -377,6 +381,30 @@
                 console.error('Download error:', error);
                 alert('Download failed');
             });
+        }
+
+        function deleteFile(documentId) {
+            if (confirm("Are you sure you want to delete this document?")) {
+                fetch(`/boards/delete-document/${documentId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}' // Ensure CSRF token is sent
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        // Optionally, you can remove the deleted document from the DOM
+                        location.reload();  // Reload the page to refresh the file list
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
         }
         
 
