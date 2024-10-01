@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 from reports.models import ProjectInfo
 from .models import Task, Project,Subtask, Comment,TaskDocument
 from django.views.decorators.csrf import csrf_exempt
@@ -387,3 +387,15 @@ def delete_document(request, document_id):
         document.delete()       # Deletes the entry from the database
         return JsonResponse({'success': True, 'message': 'Document deleted successfully!'})
     return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+
+
+
+@require_http_methods(["DELETE"])
+def delete_all_documents(request, task_id):
+    try:
+        documents = TaskDocument.objects.filter(task_id=task_id)
+        count = documents.count()
+        documents.delete()  # Delete all documents associated with the task
+        return JsonResponse({"message": f"{count} documents deleted successfully."}, status=204)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

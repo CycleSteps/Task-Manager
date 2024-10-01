@@ -15,4 +15,5 @@ urlpatterns = [
     path('document/<int:task_id>/', TaskFiles.as_view(), name='upload_document'),
     path('document/<int:task_id>/<int:file_id>/download/', views.DownloadFileView, name='download_document'),
     path('delete-document/<int:document_id>/', views.delete_document, name='delete_document'),
+    path('delete_all_documents/<int:task_id>/', views.delete_all_documents, name='delete_all_documents'),
 ]
