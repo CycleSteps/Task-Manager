@@ -7,7 +7,25 @@ from encryption.encrypt_test import encrypt_message, decrypt_message
 import pytz  # For timezone handling
 from django.utils import timezone
 
+
 class ChatConsumer(AsyncWebsocketConsumer):
+
+    """
+    The `ChatConsumer` class is an asynchronous WebSocket consumer that handles real-time chat functionality in a Django Channels-based application.
+
+    The class provides the following functionality:
+
+    - `connect`: Joins the user to a chat room group based on the room name and the user's username.
+    - `disconnect`: Leaves the user from the chat room group when the WebSocket connection is closed.
+    - `receive`: Handles incoming messages from the WebSocket, encrypts the message, saves it to the database, and sends the message to the chat 
+    room group.
+    - `chat_message`: Handles incoming messages from the chat room group, decrypts the message, converts the timestamp to the Indian timezone 
+    (Asia/Kolkata), and sends the message to the WebSocket.
+
+    The class uses the `encrypt_message` and `decrypt_message` functions from the `encryption.encrypt_test` module to encrypt and decrypt the
+    chat messages, respectively. It also uses the `sync_to_async` function from `asgiref.sync` to interact with the Django ORM in an asynchronous
+    context.
+    """
 
     async def connect(self):
         self.room_name = '-'.join(sorted([self.scope['user'].username, self.scope['url_route']['kwargs']['room_name']]))

@@ -9,13 +9,30 @@ import random
 
 
 def index(request):
+    """
+    Redirects the user to the appropriate view based on their authentication status.
+    
+    If the user is authenticated, they are redirected to the 'dashboard' view.
+    If the user is not authenticated, they are redirected to the 'signIn' view.
+    """
     if request.user.is_authenticated:
         return redirect('dashboard')
     else:
         return redirect('signIn')
 
 
+
 class SignIn(View):
+    """
+    Handles user sign-in functionality.
+    
+    The `SignIn` class provides two methods:
+    
+    - `get(self, request)`: Renders the authentication template if the user is not authenticated, otherwise redirects the user to the dashboard.
+    - `post(self, request)`: Authenticates the user with the provided username and password. If the authentication is successful, the user 
+    is logged in and redirected to the dashboard. If the authentication fails, a 403 Forbidden response is returned with an 
+    "Invalid Credential" error message.
+    """
     def get(self, request):
         if request.user.is_authenticated:
             return redirect('dashboard')
@@ -36,7 +53,16 @@ class SignIn(View):
             return response
 
 
+
 class SignUp(View):
+    """
+    Handles user sign-up functionality.
+    
+    The `SignUp` class provides two methods:
+    
+    - `get(self, request)`: Redirects the authenticated user to the 'boards' view, otherwise redirects the user to the 'signIn' view.
+    - `post(self, request)`: Creates a new user with the provided username, email, and password. If the user creation is successful, the user is logged in and redirected to the 'boards' view. If the user creation fails due to a duplicate user or server error, a 403 Forbidden response is returned with an "Duplicate User or Server error" error message.
+    """
     def get(self, request):
         if request.user.is_authenticated:
             return redirect('boards')
