@@ -99,6 +99,35 @@
     margin-top: 0.5rem;
 }
 
+.file-upload {
+    position: relative;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.file-name {
+    flex-grow: 1;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+}
+
+.progress {
+    margin-left: 10px;
+    height: 20px;
+}
+
+.progress-bar {
+    transition: width 0.4s;
+}
+
 </style>
 
     <!--begin::Content-->
@@ -251,95 +280,114 @@
                         <div class="modal-header">
                             <h5 id="taskTitleDisplay{{ t.id }}" class="task-title" onclick="makeTitleEditable({{ t.id }})">{{ t.name }}</h5>
                             <input name="name" type="text" class="form-control d-none" id="taskName{{ t.id }}" value="{{ t.name }}" onblur="saveTaskTitle({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'title')" />
-                            {% comment %} <div class="ml-auto">
-                                <i class="fas fa-edit" aria-hidden="true" style="cursor: pointer; font-size: 20px; color: #007bff;" onclick="updateTaskName({{ t.id }})"></i>
-                            </div> {% endcomment %}
-                            {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <i aria-hidden="true" class="ki ki-close"></i>
-                            </button> {% endcomment %}
-                        </div>
-                        <div class="modal-body">
-                            <div class="d-flex flex-column mb-4">
-                                <div class="mb-2">
-                                    <span class="users-title">Assigned To:</span>
-                                    <span class="font-weight-bold user-names">{{ t.assigned_to.all|join:", " }}</span>
-                                </div>
-                                <div class="description-section">
-                                    <!-- Description shown as plain text initially -->
-                                    <p id="taskDescriptionDisplay{{ t.id }}" class="description-text" onclick="makeDescriptionEditable({{ t.id }})">{{ t.description }}</p>
-                                    
-                                    <!-- Description input field, hidden by default -->
-                                    <textarea name="description" class="form-control d-none" id="taskDescription{{ t.id }}" onblur="saveTaskDescription({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'description')">{{ t.description }}</textarea>
-                                </div>
-                                <div class="time-info">
-                                    <span class="badge badge-info badge-sm">Start Time: {{ t.start_time }}</span>
-                                    <span class="badge badge-success badge-sm">End Time: {{ t.end_time }}</span>
-                                </div>
-                            </div>
-            
-                            <h6 class="mt-4">Subtasks</h6>
-                           {% comment %} <div class="progress mb-3">
-                                <div class="progress-bar bg-danger" role="progressbar" id="progressBar{{ t.id }}" style="width: {{ t.subtasks.completed|floatformat:0 }}%;" aria-valuenow="{{ t.subtasks.completed }}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>  {% endcomment %}
-                            
-                            <ul class="list-unstyled mb-4" id="subtaskList{{ t.id }}">
-                                {% for subtask in t.subtasks.all %}
-                                    <li class="d-flex align-items-center mb-2">
-                                        <input type="checkbox" class="subtask-checkbox mr-2" id="subtask{{ subtask.id }}" onchange="updateSubtaskStatus({{ subtask.id }}, this.checked)" {{ subtask.is_completed|yesno:"checked," }} />
-                                        <label for="subtask{{ subtask.id }}">{{ subtask.description }}</label>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            
-                            <div class="mb-4">
-                                <input type="text" class="form-control mb-2" placeholder="Add a subtask..." id="subtaskInput{{ t.id }}">
-                                <button class="btn btn-primary" onclick="addSubtask({{ t.id }})">Add Subtask</button>
-                            </div>
-            
-                            <div class="comments">
-                                <h6>Comments</h6>
-                                <div id="commentsSection{{ t.id }}" class="mb-3">
-                                    {% for comment in t.comments.all %}
-                                        <div class="comment-item mb-2">
-                                            <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <textarea class="form-control mb-2" placeholder="Add a comment..." id="commentInput{{ t.id }}"></textarea>
-                                <button class="btn btn-primary" onclick="addComment({{ t.id }})">Submit</button>
-                            </div>
-
-                            <div class="document-vault-section">
-                                <h6>Document Vault</h6>
-                                <div id="fileList{{ t.id }}" class="file-list mb-3">
-                                    {% for file in t.documents.all %}
-                                    <div class="file-item mb-2 d-flex justify-content-between align-items-center">
-                                        <span>{{ file.name }}</span>
-                                        <div>
-                                            <a href="#" onclick="downloadFile({{ t.id }}, {{ file.id }}, '{{ file.name }}')" class="btn btn-sm btn-primary">
-                                                <i class="fa fa-download" aria-hidden="true"></i>
-                                            </a>
-                                            <a href="#" onclick="deleteFile({{ file.id }})" class="btn btn-sm btn-danger">
-                                                <i class="fa fa-trash" aria-hidden="true"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            
-                                <div class="file-upload mb-3">
-                                    <input type="file" id="fileInput{{ t.id }}" name="files" class="form-control-file" multiple>
-                                    <button class="btn btn-primary mt-2" onclick="uploadFiles({{ t.id }})">
-                                        <i class="fa fa-upload" aria-hidden="true"></i> Upload Documents
-                                    </button>
-                                </div>
-                            
-                                <button class="btn btn-danger mt-2" onclick="deleteAllFiles({{ t.id }})">
-                                    <i class="fa fa-trash" aria-hidden="true"></i> Delete All Documents
+                            <div class="ml-auto">
+                                <button class="btn btn-sm btn-secondary" onclick="makeTitleEditable({{ t.id }})">
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
                                 </button>
                             </div>
-                            
-                                                       
+                        </div>
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="d-flex flex-column mb-4">
+                                    <div class="mb-2">
+                                        <span class="users-title">Assigned To:</span>
+                                        <span class="font-weight-bold user-names">{{ t.assigned_to.all|join:", " }}</span>
+                                    </div>
+                                    <div class="description-section">
+                                        <p id="taskDescriptionDisplay{{ t.id }}" class="description-text">{{ t.description }}</p>
+                                        <textarea name="description" class="form-control d-none" id="taskDescription{{ t.id }}" onblur="saveTaskDescription({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'description')">{{ t.description }}</textarea>
+                                        <button class="btn btn-sm btn-secondary mt-2" onclick="makeDescriptionEditable({{ t.id }})">
+                                            <i class="fas fa-edit" aria-hidden="true"></i> Edit Description
+                                        </button>
+                                    </div>
+                                    <div class="time-info">
+                                        <span class="badge badge-info badge-sm">Start Time: {{ t.start_time }}</span>
+                                        <span class="badge badge-success badge-sm">End Time: {{ t.end_time }}</span>
+                                    </div>
+                                </div>
+                        
+                                <h6 class="mt-4">Subtasks</h6>
+                                <ul class="list-unstyled mb-4" id="subtaskList{{ t.id }}">
+                                    {% for subtask in t.subtasks.all %}
+                                        <li class="d-flex align-items-center mb-2">
+                                            <input type="checkbox" class="subtask-checkbox mr-2" id="subtask{{ subtask.id }}" onchange="updateSubtaskStatus({{ subtask.id }}, this.checked)" {{ subtask.is_completed|yesno:"checked," }} />
+                                            <label for="subtask{{ subtask.id }}">{{ subtask.description }}</label>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                        
+                                <div class="mb-4">
+                                    <input type="text" class="form-control mb-2" placeholder="Add a subtask..." id="subtaskInput{{ t.id }}">
+                                    <button class="btn btn-primary" onclick="addSubtask({{ t.id }})">Add Subtask</button>
+                                </div>
+                        
+                                <div class="comments">
+                                    <h6>Comments</h6>
+                                    <div id="commentsSection{{ t.id }}" class="mb-3">
+                                        {% for comment in t.comments.all %}
+                                            <div class="comment-item mb-2">
+                                                <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <textarea class="form-control mb-2" placeholder="Add a comment..." id="commentInput{{ t.id }}"></textarea>
+                                    <button class="btn btn-primary" onclick="addComment({{ t.id }})">Submit</button>
+                                </div>
+                        
+                                <div class="document-vault-section">
+                                    <h6>Document Vault</h6>
+                                    <div id="fileList{{ t.id }}" class="file-list mb-3">
+                                        {% for file in t.documents.all %}
+                                        <div class="file-item mb-2 d-flex justify-content-between align-items-center">
+                                            <span>{{ file.name }}</span>
+                                            <div>
+                                                <a href="#" onclick="downloadFile({{ t.id }}, {{ file.id }}, '{{ file.name }}')" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="#" onclick="deleteFile({{ file.id }})" class="btn btn-sm btn-danger">
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                </a>
+                                            </div>
+                                            <!-- Progress bar for download indication -->
+                                            <div class="progress" style="width: 100px; display: none;" id="progressContainer{{ file.id }}">
+                                                <div id="progressBar{{ file.id }}" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                            </div>
+                                        </div>                                       
+                                        {% endfor %}
+
+                                        <!-- Modal for download feedback -->
+                                        {% comment %} <div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="downloadModalLabel">Downloading</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Your file is being downloaded, please wait...
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {% endcomment %}
+                                    </div>
+                        
+                                    <div class="file-upload mb-3">
+                                        <input type="file" id="fileInput{{ t.id }}" name="files" class="form-control-file" multiple>
+                                        <button class="btn btn-primary mt-2" onclick="uploadFiles({{ t.id }})">
+                                            <i class="fa fa-upload" aria-hidden="true"></i> Upload Documents
+                                        </button>
+                                        <ul id="fileList{{ t.id }}" class="list-unstyled mt-2">
+                                            <!-- File items will be dynamically added here -->
+                                        </ul>
+                                    </div>
+                        
+                                    <button class="btn btn-danger mt-2" onclick="deleteAllFiles({{ t.id }})">
+                                        <i class="fa fa-trash" aria-hidden="true"></i> Delete All Documents
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -359,33 +407,51 @@
     <script>
 
         function downloadFile(taskId, fileId, fileName) {
-            fetch(`/boards/document/${taskId}/${fileId}/download/`, {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included for security
+            const progressContainer = document.getElementById(`progressContainer${fileId}`);
+            const progressBar = document.getElementById(`progressBar${fileId}`);
+        
+            // Show progress bar
+            progressContainer.style.display = 'block';
+        
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `/boards/document/${taskId}/${fileId}/download/`, true);
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Ensure CSRF token is included for security
+            xhr.responseType = 'blob';
+        
+            xhr.onprogress = function (event) {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.setAttribute('aria-valuenow', percentComplete);
+                    progressBar.textContent = Math.round(percentComplete) + '%';
                 }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('File download failed');
+            };
+        
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const blob = xhr.response;
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+        
+                    // Hide progress bar after download
+                    progressContainer.style.display = 'none';
+                } else {
+                    alert('Download failed');
                 }
-                return response.blob();  // Get the file as a Blob
-            })
-            .then(blob => {
-                // Create a link to download the file
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;  // Set the filename based on the original file name
-                document.body.appendChild(a);
-                a.click();  // Trigger the download
-                a.remove();  // Remove the link after download
-                window.URL.revokeObjectURL(url); // Clean up the URL object
-            })
-            .catch(error => {
-                console.error('Download error:', error);
+            };
+        
+            xhr.onerror = function () {
                 alert('Download failed');
-            });
+                progressContainer.style.display = 'none';
+            };
+        
+            xhr.send();
         }
 
         function deleteFile(documentId) {
@@ -441,6 +507,10 @@
         function uploadFiles(taskId) {
             const fileInput = document.getElementById(`fileInput${taskId}`);
             const files = fileInput.files;
+            const fileList = document.getElementById(`fileList${taskId}`);
+        
+            // Clear previous file list
+            fileList.innerHTML = '';
         
             // 200 MB limit in bytes
             const MAX_UPLOAD_SIZE = 200 * 1024 * 1024;
@@ -450,6 +520,17 @@
                 let validFiles = true;
         
                 for (let i = 0; i < files.length; i++) {
+                    // Create file item in the list
+                    const fileItem = document.createElement('li');
+                    fileItem.classList.add('file-item');
+                    fileItem.innerHTML = `
+                        <span class="file-name">${files[i].name}</span>
+                        <div class="spinner-border text-primary d-none" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    `;
+                    fileList.appendChild(fileItem);
+        
                     // Check file size
                     if (files[i].size > MAX_UPLOAD_SIZE) {
                         alert(`File ${files[i].name} exceeds the 200 MB limit.`);
@@ -460,6 +541,10 @@
                 }
         
                 if (validFiles) {
+                    // Show spinner for each file
+                    const spinners = fileList.querySelectorAll('.spinner-border');
+                    spinners.forEach(spinner => spinner.classList.remove('d-none'));
+        
                     fetch(`/boards/document/${taskId}/`, {
                         method: 'POST',
                         body: formData,
@@ -469,6 +554,9 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // Hide all spinners
+                        spinners.forEach(spinner => spinner.classList.add('d-none'));
+        
                         if (data.success) {
                             // Optionally display success message
                             alert('Files uploaded successfully!');
@@ -480,6 +568,9 @@
                         }
                     })
                     .catch(error => {
+                        // Hide all spinners
+                        spinners.forEach(spinner => spinner.classList.add('d-none'));
+                        
                         console.error('Upload error:', error);
                     });
                 }
@@ -492,8 +583,8 @@
         
         
 
-                
-        // Function to make the task title editable
+                        
+                // Function to make the task title editable
         function makeTitleEditable(taskId) {
             const titleDisplay = document.getElementById(`taskTitleDisplay${taskId}`);
             const titleInput = document.getElementById(`taskName${taskId}`);
@@ -545,28 +636,15 @@
             updateTaskName(taskId);
         }
 
-        // Function to handle saving when the user presses Enter
-        function checkEnter(event, taskId, field) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                if (field === 'title') {
-                    saveTaskTitle(taskId);
-                } else if (field === 'description') {
-                    saveTaskDescription(taskId);
-                }
-            }
-        }
-        
         function updateTaskName(taskId) {
             var titleInput = document.getElementById('taskName' + taskId);
             var descInput = document.getElementById('taskDescription' + taskId);
-        
+            
             var taskTitle = titleInput ? titleInput.value : '';
             var taskDescription = descInput ? descInput.value : '';
-        
+            
             const updateUrl = "{% url 'tasks' 0 %}".replace('0', taskId); 
             
-        
             fetch(updateUrl, {
                 method: 'PUT',
                 headers: {
@@ -593,6 +671,20 @@
                 console.error('Error updating task:', error);
             });
         }
+
+        // Function to handle saving when the user presses Enter
+        function checkEnter(event, taskId, field) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (field === 'title') {
+                    saveTaskTitle(taskId);
+                } else if (field === 'description') {
+                    saveTaskDescription(taskId);
+                }
+            }
+        }
+        
+        
         
         // CSRF Token Helper Function (Django-specific)
         function getCSRFToken() {

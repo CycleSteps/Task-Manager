@@ -148,7 +148,7 @@ class Tasks(View):
         else:
            return render(request, 'tasks.html')
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def update_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     new_title = request.data.get('name')
