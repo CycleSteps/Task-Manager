@@ -674,7 +674,11 @@ textarea {
                             // Optionally display success message
                             alert('Files uploaded successfully!');
                             
-                            // Refresh the page
+                            // Clear the file input and file list
+                            fileInput.value = '';
+                            fileList.innerHTML = '';
+        
+                            // Refresh the page if necessary
                             location.reload();
                         } else {
                             alert('File upload failed: ' + (data.message || 'Unknown error'));
@@ -691,7 +695,7 @@ textarea {
                 alert('Please select files to upload');
             }
         }
-
+        
          // Function to handle saving when the user presses Enter
          function checkEnter(event, taskId, field) {
             if (event.key === 'Enter') {
