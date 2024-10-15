@@ -37,6 +37,9 @@
     line-height: 1.5; /* Improved readability */
     display: block;
     white-space: pre-wrap; /* Preserve line breaks */
+    overflow:auto;
+    flex-grow: 1; /* Make description text flexible */
+    cursor: pointer; /* Pointer cursor for edit */
 }
 
 .users-title {
@@ -126,6 +129,78 @@
 
 .progress-bar {
     transition: width 0.4s;
+}
+
+.textarea-highlight {
+    background-color: #f0f8ff; /* Light blue background */
+}
+
+.modal-header .close {
+    font-size: 1.8rem;
+    color: #333; /* Adjust the color as needed */
+    cursor: pointer;
+    outline: none;
+}
+
+.modal-header .task-title {
+    cursor: pointer;
+}
+
+.modal-header .form-control {
+    margin-top: 0.5rem;
+}
+
+.modal-header #titleCounter {
+    font-size: 0.85rem;
+}
+
+.description-section {
+    padding: 10px;
+    border: 1px solid #dee2e6; /* Border color */
+    border-radius: 0.25rem; /* Rounded corners */
+    background-color: #f8f9fa; /* Light background */
+    margin-top: 10px; /* Space above */
+}
+
+.task-title {
+    font-size: 1.25rem; /* Larger font for title */
+    font-weight: bold; /* Bold text */
+}
+
+
+textarea {
+    resize: none; /* Prevent resizing */
+}
+
+/* Hide update buttons initially */
+.d-none {
+    display: none; /* Hidden elements */
+}
+
+/* Show buttons when editing */
+.show-button {
+    display: inline-block; /* Show element */
+}
+
+.selectpicker {
+    width: 100px; /* Adjust width as needed */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #007bff; /* Border color */
+}
+
+.selectpicker:focus {
+    border-color: #0056b3; /* Focus border color */
+    box-shadow: 0 0 5px rgba(0, 123, 255, .5); /* Focus shadow */
+}
+
+/* Optional: Adjust the button style */
+.btn {
+    background-color: #007bff; /* Primary button color */
+    border-color: #007bff; /* Button border color */
+}
+
+.btn:hover {
+    background-color: #0056b3; /* Darker shade on hover */
 }
 
 </style>
@@ -277,35 +352,56 @@
             <div class="modal fade hidden" id="task-details-{{ t.id }}" tabindex="-1" role="dialog" aria-labelledby="taskDetailsLabel{{ t.id }}" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 id="taskTitleDisplay{{ t.id }}" class="task-title" onclick="makeTitleEditable({{ t.id }})">{{ t.name }}</h5>
-                            <input name="name" type="text" class="form-control d-none" id="taskName{{ t.id }}" value="{{ t.name }}" onblur="saveTaskTitle({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'title')" />
-                            <div class="ml-auto">
-                                <button class="btn btn-sm btn-secondary" onclick="makeTitleEditable({{ t.id }})">
-                                    <i class="fas fa-edit" aria-hidden="true"></i>
-                                </button>
+                        <div class="modal-header d-flex align-items-center justify-content-between">
+                            <div class="d-flex flex-column">
+                                <div class="d-flex align-items-center">
+                                    <h5 id="taskTitleDisplay{{ t.id }}" class="task-title mb-1" onclick="makeTitleEditable({{ t.id }})">{{ t.name }}</h5>
+                                    <input name="name" type="text" class="form-control d-none" id="taskName{{ t.id }}" value="{{ t.name }}" 
+                                           onblur="saveTaskTitle({{ t.id }})" 
+                                           onkeydown="checkEnter(event, {{ t.id }}, 'title')" 
+                                           oninput="updateTitleCounter({{ t.id }})" maxlength="30" />
+                                        <i class="fas fa-pen-to-square fa-2xl ml-2 d-none" id="updateTitleButton{{ t.id }}" 
+                                        onclick="updateTaskTitle({{ t.id }}, {{ proj.id }})" style="color: #6993ff;cursor:pointer;"></i>  
+                                </div>
+                                <span id="titleCounter{{ t.id }}" class="text-muted small mt-1">0/30</span>
                             </div>
+                            <button type="button" class="close btn" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; padding: 0;">
+                                <i class="fas fa-times"></i> 
+                            </button>
                         </div>
+                                                                  
                         <div class="modal-content">
                             <div class="modal-body">
                                 <div class="d-flex flex-column mb-4">
                                     <div class="mb-2">
-                                        <span class="users-title">Assigned To:</span>
-                                        <span class="font-weight-bold user-names">{{ t.assigned_to.all|join:", " }}</span>
-                                    </div>
-                                    <div class="description-section">
-                                        <p id="taskDescriptionDisplay{{ t.id }}" class="description-text">{{ t.description }}</p>
-                                        <textarea name="description" class="form-control d-none" id="taskDescription{{ t.id }}" onblur="saveTaskDescription({{ t.id }})" onkeydown="checkEnter(event, {{ t.id }}, 'description')">{{ t.description }}</textarea>
-                                        <button class="btn btn-sm btn-secondary mt-2" onclick="makeDescriptionEditable({{ t.id }})">
-                                            <i class="fas fa-edit" aria-hidden="true"></i> Edit Description
-                                        </button>
-                                    </div>
+                                        <span class="users-title">Reassign To:</span>
+                                        <span class="font-weight-bold user-names" id="assignedUsers{{ t.id }}">{{ t.assigned_to.all|join:", " }}</span>
+                                        <select class="form-control selectpicker" id="reassignUser{{ t.id }}" data-live-search="true" 
+                                                style="width: 200px;" multiple onchange="reassignUser({{ t.id }})">
+                                            <!-- Users will be dynamically populated here -->
+                                        </select>
+                                        <button class="btn btn-sm btn-primary mt-2" id="reassignButton{{ t.id }}" style="display: none;">Reassign Task</button>
+                                    </div>                                                                     
                                     <div class="time-info">
                                         <span class="badge badge-info badge-sm">Start Time: {{ t.start_time }}</span>
                                         <span class="badge badge-success badge-sm">End Time: {{ t.end_time }}</span>
                                     </div>
+                                    <br>
+                                    <h6 class="mt-4">Description</h6>
+                                    <div class="description-section">
+                                        <div class="d-flex align-items-center">
+                                            <p id="taskDescriptionDisplay{{ t.id }}" class="description-text" onclick="makeDescriptionEditable({{ t.id }})">{{ t.description }}</p>
+                                            <textarea name="description" class="form-control d-none" id="taskDescription{{ t.id }}" 
+                                                    onblur="saveTaskDescription({{ t.id }})" 
+                                                    onkeydown="checkEnter(event, {{ t.id }}, 'description')" 
+                                                    oninput="updateDescriptionCounter({{ t.id }})" maxlength="200">{{ t.description }}</textarea>
+                                                    <i class="fas fa-pen-to-square fa-2xl ml-2 d-none" id="updateDescriptionButton{{ t.id }}" 
+                                                    onclick="updateTaskDescription({{ t.id }}, {{ proj.id }})" style="color: #6993ff;cursor:pointer;"></i>
+                                        </div>
+                                        <span id="descriptionCounter{{ t.id }}" class="text-muted">0/200</span>
+                                    </div>                                   
                                 </div>
-                        
+
                                 <h6 class="mt-4">Subtasks</h6>
                                 <ul class="list-unstyled mb-4" id="subtaskList{{ t.id }}">
                                     {% for subtask in t.subtasks.all %}
@@ -348,29 +444,8 @@
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                 </a>
                                             </div>
-                                            <!-- Progress bar for download indication -->
-                                            <div class="progress" style="width: 100px; display: none;" id="progressContainer{{ file.id }}">
-                                                <div id="progressBar{{ file.id }}" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                                            </div>
-                                        </div>                                       
+                                        </div>
                                         {% endfor %}
-
-                                        <!-- Modal for download feedback -->
-                                        {% comment %} <div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="downloadModalLabel">Downloading</h5>
-                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Your file is being downloaded, please wait...
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div> {% endcomment %}
                                     </div>
                         
                                     <div class="file-upload mb-3">
@@ -378,9 +453,6 @@
                                         <button class="btn btn-primary mt-2" onclick="uploadFiles({{ t.id }})">
                                             <i class="fa fa-upload" aria-hidden="true"></i> Upload Documents
                                         </button>
-                                        <ul id="fileList{{ t.id }}" class="list-unstyled mt-2">
-                                            <!-- File items will be dynamically added here -->
-                                        </ul>
                                     </div>
                         
                                     <button class="btn btn-danger mt-2" onclick="deleteAllFiles({{ t.id }})">
@@ -406,52 +478,93 @@
 
     <script>
 
+        $(document).ready(function() {
+            $('.selectpicker').selectpicker(); // Initialize selectpicker
+        
+            function fetchAssignedUsers(taskId) {
+                fetch(`/boards/get_assigned_users/${taskId}/`)
+                    .then(response => response.json())
+                    .then(users => {
+                        const select = document.getElementById(`reassignUser${taskId}`);
+                        select.innerHTML = '<option value="">Select User</option>'; // Clear existing options
+                        users.forEach(user => {
+                            const option = document.createElement("option");
+                            option.value = user.id;
+                            option.text = user.username;
+                            select.appendChild(option);
+                        });
+                        // Reinitialize selectpicker
+                        $('.selectpicker').selectpicker('refresh');
+                    })
+                    .catch(error => console.error('Error fetching users:', error));
+            }
+        
+            $('.selectpicker').on('show.bs.select', function (e) {
+                const taskId = $(this).attr('id').replace('reassignUser', ''); // Extract taskId from dropdown id
+                fetchAssignedUsers(taskId);
+            });
+        });
+        
+        function reassignUser(taskId) {
+            const select = document.getElementById(`reassignUser${taskId}`);
+            const userIds = Array.from(select.selectedOptions).map(option => option.value);
+            
+            if (userIds.length > 0) {
+                // Make POST request to update the assigned users
+                fetch(`/boards/reassign_task/${taskId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}' // Ensure you include CSRF token
+                    },
+                    body: new URLSearchParams({
+                        'user_ids': JSON.stringify(userIds)  // Send user IDs as a JSON string
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        // Update the displayed assigned users
+                        document.getElementById(`assignedUsers${taskId}`).innerText = data.assigned_users.join(", ");
+                        // Optionally refresh the assigned users display
+                        fetchAssignedUsers(taskId);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error updating task:', error));
+            }
+        }        
+
         function downloadFile(taskId, fileId, fileName) {
-            const progressContainer = document.getElementById(`progressContainer${fileId}`);
-            const progressBar = document.getElementById(`progressBar${fileId}`);
-        
-            // Show progress bar
-            progressContainer.style.display = 'block';
-        
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', `/boards/document/${taskId}/${fileId}/download/`, true);
-            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Ensure CSRF token is included for security
-            xhr.responseType = 'blob';
-        
-            xhr.onprogress = function (event) {
-                if (event.lengthComputable) {
-                    const percentComplete = (event.loaded / event.total) * 100;
-                    progressBar.style.width = percentComplete + '%';
-                    progressBar.setAttribute('aria-valuenow', percentComplete);
-                    progressBar.textContent = Math.round(percentComplete) + '%';
+            fetch(`/boards/document/${taskId}/${fileId}/download/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is included for security
                 }
-            };
-        
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    const blob = xhr.response;
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-        
-                    // Hide progress bar after download
-                    progressContainer.style.display = 'none';
-                } else {
-                    alert('Download failed');
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('File download failed');
                 }
-            };
-        
-            xhr.onerror = function () {
+                return response.blob();  // Get the file as a Blob
+            })
+            .then(blob => {
+                // Create a link to download the file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;  // Set the filename based on the original file name
+                document.body.appendChild(a);
+                a.click();  // Trigger the download
+                a.remove();  // Remove the link after download
+                window.URL.revokeObjectURL(url); // Clean up the URL object
+            })
+            .catch(error => {
+                console.error('Download error:', error);
                 alert('Download failed');
-                progressContainer.style.display = 'none';
-            };
-        
-            xhr.send();
+            });
         }
 
         function deleteFile(documentId) {
@@ -578,102 +691,9 @@
                 alert('Please select files to upload');
             }
         }
-        
-        
-        
-        
 
-                        
-                // Function to make the task title editable
-        function makeTitleEditable(taskId) {
-            const titleDisplay = document.getElementById(`taskTitleDisplay${taskId}`);
-            const titleInput = document.getElementById(`taskName${taskId}`);
-            
-            titleDisplay.classList.add('d-none'); // Hide the title display
-            titleInput.classList.remove('d-none'); // Show the input field
-            titleInput.focus(); // Focus on the input field for immediate editing
-        }
-
-        // Function to save the task title when editing is done
-        function saveTaskTitle(taskId) {
-            const titleDisplay = document.getElementById(`taskTitleDisplay${taskId}`);
-            const titleInput = document.getElementById(`taskName${taskId}`);
-
-            // Update the title display with the new input value
-            titleDisplay.textContent = titleInput.value;
-
-            // Hide the input and show the display
-            titleInput.classList.add('d-none');
-            titleDisplay.classList.remove('d-none');
-            
-            // Optionally send AJAX request to update the server
-            updateTaskName(taskId);
-        }
-
-        // Function to make the description editable
-        function makeDescriptionEditable(taskId) {
-            const descDisplay = document.getElementById(`taskDescriptionDisplay${taskId}`);
-            const descInput = document.getElementById(`taskDescription${taskId}`);
-            
-            descDisplay.classList.add('d-none'); // Hide the description display
-            descInput.classList.remove('d-none'); // Show the input field
-            descInput.focus(); // Focus on the input field for immediate editing
-        }
-
-        // Function to save the task description when editing is done
-        function saveTaskDescription(taskId) {
-            const descDisplay = document.getElementById(`taskDescriptionDisplay${taskId}`);
-            const descInput = document.getElementById(`taskDescription${taskId}`);
-
-            // Update the description display with the new input value
-            descDisplay.textContent = descInput.value;
-
-            // Hide the input and show the display
-            descInput.classList.add('d-none');
-            descDisplay.classList.remove('d-none');
-            
-            // Optionally send AJAX request to update the server
-            updateTaskName(taskId);
-        }
-
-        function updateTaskName(taskId) {
-            var titleInput = document.getElementById('taskName' + taskId);
-            var descInput = document.getElementById('taskDescription' + taskId);
-            
-            var taskTitle = titleInput ? titleInput.value : '';
-            var taskDescription = descInput ? descInput.value : '';
-            
-            const updateUrl = "{% url 'tasks' 0 %}".replace('0', taskId); 
-            
-            fetch(updateUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken(),  // Include CSRF token
-                },
-                body: JSON.stringify({
-                    task_id: taskId,
-                    name: taskTitle,
-                    description: taskDescription
-                })
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    console.log('Task updated successfully:', data);
-                } else {
-                    console.error('Failed to update task:', data.message);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error updating task:', error);
-            });
-        }
-
-        // Function to handle saving when the user presses Enter
-        function checkEnter(event, taskId, field) {
+         // Function to handle saving when the user presses Enter
+         function checkEnter(event, taskId, field) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 if (field === 'title') {
@@ -683,6 +703,110 @@
                 }
             }
         }
+
+        // Function to update title character counter
+        function updateTitleCounter(taskId) {
+            const titleInput = document.getElementById(`taskName${taskId}`);
+            const titleCounter = document.getElementById(`titleCounter${taskId}`);
+            titleCounter.textContent = `${titleInput.value.length}/30`;
+        }
+
+        function updateDescriptionCounter(taskId) {
+            const textarea = document.getElementById(`taskDescription${taskId}`);
+            const counter = document.getElementById(`descriptionCounter${taskId}`);
+            const length = textarea.value.length;
+            counter.textContent = `${length}/200`;
+        }
+    
+              
+        // Function to handle the update task logic
+        function updateTask(taskId) {
+            saveTaskTitle(taskId);
+            saveTaskDescription(taskId);
+        }
+
+        function makeTitleEditable(id) {
+            document.getElementById('taskTitleDisplay' + id).classList.add('d-none'); // Hide title display
+            document.getElementById('taskName' + id).classList.remove('d-none'); // Show input
+            document.getElementById('updateTitleButton' + id).classList.remove('d-none'); // Show button
+            document.getElementById('titleCounter' + id).classList.remove('d-none'); // Show counter
+        }
+        
+        function makeDescriptionEditable(id) {
+            document.getElementById('taskDescriptionDisplay' + id).classList.add('d-none'); // Hide description display
+            document.getElementById('taskDescription' + id).classList.remove('d-none'); // Show textarea
+            document.getElementById('updateDescriptionButton' + id).classList.remove('d-none'); // Show button
+            document.getElementById('descriptionCounter' + id).classList.remove('d-none'); // Show counter
+        }
+        
+
+
+        function updateTaskTitle(taskId, projectId) {
+            const titleInput = document.getElementById(`taskName${taskId}`);
+            const taskTitle = titleInput.value;
+        
+            fetch(`/boards/${projectId}/update-title/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    task_id: taskId,
+                    name: taskTitle
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`taskTitleDisplay${taskId}`).textContent = taskTitle;
+                    alert('Task title updated successfully!'); // Show alert message
+                    window.location.reload();
+                } else {
+                    console.error('Failed to update task title:', data.message);
+                    alert(`Error: ${data.message}`); // Show error message
+                }
+            })
+            .catch(error => {
+                console.error('Error updating task title:', error);
+                alert('Error updating task title.'); // Show error message
+            });
+        }
+        
+        function updateTaskDescription(taskId, projectId) {
+            const descInput = document.getElementById(`taskDescription${taskId}`);
+            const taskDescription = descInput.value;
+        
+            fetch(`/boards/${projectId}/update-description/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    task_id: taskId,
+                    description: taskDescription
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`taskDescriptionDisplay${taskId}`).textContent = taskDescription;
+                    alert('Task description updated successfully!'); // Show alert message
+                    window.location.reload();
+                    
+                } else {
+                    console.error('Failed to update task description:', data.message);
+                    alert(`Error: ${data.message}`); // Show error message
+                }
+            })
+            .catch(error => {
+                console.error('Error updating task description:', error);
+                alert('Error updating task description.'); // Show error message
+            });
+        }
+        
+        
         
         
         
@@ -831,15 +955,16 @@
                                         {
                                             'id': {{ t.id }},
                                             'title': `
-                                <div class="d-flex align-items-center">
-                        	        {% comment %} <div class="symbol symbol-success mr-3">
-                        	            <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
-                        	        </div> {% endcomment %}
-                        	        <div class="d-flex flex-column align-items-start">
-                        	            <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
-                        	            {% comment %} <span class="label label-inline label-light-dark font-weight-bold">{{t.end_time}}</span> {% endcomment %}
-                        	        </div>
-                        	    </div>`
+                                                <div class="d-flex align-items-center">
+                                                    {% comment %} <div class="symbol symbol-success mr-3">
+                                                        <img alt="Pic" src="{% static t.assigned_to.profile.profile_photo %}" />
+                                                    </div> {% endcomment %}
+                                                    <div class="d-flex flex-column align-items-start">
+                                                        <span class="text-dark-50 font-weight-bold mb-1">{{t.name}}</span>
+                                                        {% comment %} <span class="label label-inline label-light-dark font-weight-bold">{{t.end_time}}</span> {% endcomment %}
+                                                    </div>
+                                                </div>
+                                                `
                                         },
                                     {% endif %}
                                 {% endfor %}

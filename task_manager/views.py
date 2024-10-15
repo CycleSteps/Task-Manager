@@ -91,17 +91,34 @@ class Tasks(View):
             return redirect("signIn")
 
         proj = Project.objects.filter(id=id).first()
+        
+        if proj is None:
+            # Handle the case where the project does not exist
+            return redirect("project_not_found")  # Redirect to an error page or similar
+
         user = request.user
+        
+        # Get users associated with the project
         users = User.objects.filter(Q(id__in=proj.get_members()) | Q(id=proj.owner.id))
+
+        # Get all tasks associated with the project
+        tasks = proj.task_set.all()  # Ensure this is returning valid task objects
+
+        # Get the list of tasks without assigned users
+
         data = {
             "user": user,
             "first": user.username[0],
             "other_users": users,
-            "tasks": proj.task_set.all(),
+            "tasks": tasks,  # Make sure this returns a valid queryset
             'proj': proj,
             "can_add": user == proj.owner
         }
+        
         return render(request, 'tasks.html', data)
+
+
+
 
     def post(self, request, id):
         if not request.user.is_authenticated:
@@ -126,27 +143,7 @@ class Tasks(View):
 
         return redirect('tasks', id=id)
 
-    def put(self, request, id):
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'Unauthorized'}, status=401)
 
-        # Parse the JSON body from the PUT request
-        body = json.loads(request.body.decode('utf-8'))
-
-        task_id = body.get('task_id')
-        name = body.get('name')
-        description = body.get('description')
-
-        task = Task.objects.filter(id=task_id, project_id=id).first()
-
-        if task:
-            task.name = name
-            task.description = description
-
-            task.save()
-            return render(request, 'tasks.html')
-        else:
-           return render(request, 'tasks.html')
 
 @api_view(['PUT'])
 def update_task(request, task_id):
@@ -399,3 +396,78 @@ def delete_all_documents(request, task_id):
         return JsonResponse({"message": f"{count} documents deleted successfully."}, status=204)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+
+def update_task_title(request, id):
+    if request.method == 'PUT' and request.user.is_authenticated:
+        body = json.loads(request.body.decode('utf-8'))
+        task_id = body.get('task_id')
+        name = body.get('name')
+
+        try:
+            task_id = int(task_id)
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'message': 'Invalid task ID'}, status=400)
+
+        task = Task.objects.filter(id=task_id, project_id=id).first()
+
+        if task:
+            task.name = name
+            task.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'message': 'Task not found'}, status=404)
+    return JsonResponse({'error': 'Unauthorized or Invalid request'}, status=401)
+
+
+def update_task_description(request, id):
+    if request.method == 'PUT' and request.user.is_authenticated:
+        body = json.loads(request.body.decode('utf-8'))
+        task_id = body.get('task_id')
+        description = body.get('description')
+
+        try:
+            task_id = int(task_id)
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'message': 'Invalid task ID'}, status=400)
+
+        task = Task.objects.filter(id=task_id, project_id=id).first()
+
+        if task:
+            task.description = description
+            task.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'message': 'Task not found'}, status=404)
+    return JsonResponse({'error': 'Unauthorized or Invalid request'}, status=401)
+
+
+def get_assigned_users(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    # Get all users and exclude those assigned to the current task
+    unassigned_users = User.objects.exclude(id__in=task.assigned_to.values_list('id', flat=True))
+    users_data = [{"id": user.id, "username": user.username} for user in unassigned_users]
+    return JsonResponse(users_data, safe=False)
+
+def reassign_task(request, task_id):
+    if request.method == "POST":
+        user_ids = request.POST.get('user_ids')  # Get user_ids from the request
+        task = get_object_or_404(Task, id=task_id)
+
+        # Clear previous assigned users
+        task.assigned_to.clear()
+
+        # Assign new users if user_ids is not empty
+        if user_ids:
+            user_ids = json.loads(user_ids)  # Convert JSON string to list
+            users = User.objects.filter(id__in=user_ids)  # Get users based on user IDs
+            task.assigned_to.add(*users)  # Add users to the task
+
+        task.save()
+
+        # Prepare the response data to return the newly assigned usernames
+        assigned_usernames = [user.username for user in task.assigned_to.all()]
+
+        return JsonResponse({"success": True, "message": "Task reassigned successfully.", "assigned_users": assigned_usernames})
+    
+    return JsonResponse({"success": False, "message": "Invalid request."})

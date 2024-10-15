@@ -16,4 +16,9 @@ urlpatterns = [
     path('document/<int:task_id>/<int:file_id>/download/', views.DownloadFileView, name='download_document'),
     path('delete-document/<int:document_id>/', views.delete_document, name='delete_document'),
     path('delete_all_documents/<int:task_id>/', views.delete_all_documents, name='delete_all_documents'),
+    path('<int:id>/update-title/', views.update_task_title, name='update_task_title'),
+    path('<int:id>/update-description/', views.update_task_description, name='update_task_description'),
+    path('reassign_task/<int:task_id>/', views.reassign_task, name='reassign_task'),
+    path('get_assigned_users/<int:task_id>/', views.get_assigned_users, name='get_assigned_users'),
 ]
+
