@@ -93,27 +93,7 @@
         font-size: 3.5rem; /* Larger font size for numbers */
         color: black;
     }
-    
-    /* Simplified vertical line after the second card */
-    .row {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-between; /* Space out the cards evenly */
-        align-items: stretch;
-    }
-    
-    .c-dashboardInfo:nth-child(2)::after {
-        content: '';
-        position: absolute;
-        right: -20px; /* Adjust spacing between the vertical line and the second card */
-        top: 0;
-        height: 100%;
-        width: 5px; /* Width of the vertical line */
-        background: #d0d0d0; /* Light gray color for the line */
-        border-radius: 5px; /* Rounded edges for a softer look */
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Shadow for the vertical line */
-    }
-    
+        
     /* Ensure equal spacing between all cards */
     .c-dashboardInfo {
         margin: 0 20px; /* Increased margin to separate cards more */
@@ -127,11 +107,6 @@
         margin-right: 0; /* No margin on the right for the last card */
     }
     
-    /* Ensure vertical line is not affected by card hover */
-    .c-dashboardInfo:nth-child(2)::after:hover {
-        background: #d0d0d0; /* Keep the vertical line color unchanged */
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Shadow remains the same */
-    }
                             
 </style>
 
@@ -203,34 +178,32 @@
                                     </div>
                                     
                                     <!-- Second card with vertical line after it -->
-                                    <div class="c-dashboardInfo">
+                                    {% comment %} <div class="c-dashboardInfo">
                                         <div class="wrap">
                                             <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">My Tasks</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ my_tasks_count }}</span>
                                         </div>
-                                    </div>
+                                    </div> {% endcomment %}
                                     
                                     <!-- Third card -->
                                     <div class="c-dashboardInfo">
                                         <div class="wrap">
-                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Projects Assigned to</h4>
+                                            <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Projects Delegated</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ projects_assigned_count }}</span>
                                         </div>
                                     </div>
                                     
                                     <!-- Fourth card -->
-                                    <div class="c-dashboardInfo">
+                                    {% comment %} <div class="c-dashboardInfo">
                                         <div class="wrap">
                                             <h4 class="heading heading5 hind-font medium-font-weight c-dashboardInfo__title">Tasks Assigned to</h4>
                                             <span class="hind-font caption-12 c-dashboardInfo__count">{{ tasks_assigned_count }}</span>
                                         </div>
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>
                             </div>
                         </div>
-                    </div>                  
-
-
+                    </div>
                 </div>
                 {% endblock %}
 
